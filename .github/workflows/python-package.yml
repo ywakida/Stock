@@ -4,12 +4,11 @@
 name: Python package
 
 on: 
-  push:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
     
-  pull_request:
-    
-    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
   
   workflow_dispatch:
   
@@ -38,4 +37,4 @@ jobs:
         python ticker.py
     - name: chart update
       run: |
-        chart
+        python chart.py
