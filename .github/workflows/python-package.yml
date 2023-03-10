@@ -5,16 +5,19 @@ name: Python package
 
 on:
   push:
-    branches: [ "main" ]
+#     branches: [ "main" ]
+    branches: [ $default-branch ]
   pull_request:
-    branches: [ "main" ]
+#     branches: [ "main" ]
+    branches: [ $default-branch ]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+#       fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
 
