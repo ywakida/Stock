@@ -35,7 +35,7 @@ jobs:
     - name: ticker update
       run: |
         # update ticker list
-        ticker
+        python ../ticker
     - name: chart update
       run: |
         chart
