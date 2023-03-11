@@ -34,16 +34,16 @@ def create_daily_chart_csv(folder_path, ticker):
 
         # ファイルにデータがある場合は、ファイル内の最新日付から本日までのデータを追加更新を実施する
         if len(daily_chart) > 1:
-            last_date = daily_chart.tail(1).index.date[0]
+            last_date = existed_chart.index[-1].date()
             # csvファイルの最新日付の翌日から本日までのデータを取得する
             today = datetime.date.today()
             delta_date = today - last_date
-            days = delta_date.days
+            delta_days = delta_date.days
 
-            if days < 5:
-                days = 5
+            if delta_days < 5:
+                delta_days = 5
           
-            update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{days}d', interval='1d', progress=False)
+            update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
           # update_chart = update_chart[:-1] # 末尾行は削除        
             if not update_chart.empty:
                 if len(update_chart) > 1:  
