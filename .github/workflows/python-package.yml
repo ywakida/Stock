@@ -35,6 +35,21 @@ jobs:
       run: |
         # update ticker list
         python ticker.py
+        git config user.name "ywakida"
+        git config user.email "y.wakida.business@gmai.com"
+        git add -u
+        git commit -m "update ticker list" -a
+        git pull
+        git push origin master
+        
     - name: chart update
       run: |
         python chart.py
+        git config user.name "ywakida"
+        git config user.email "y.wakida.business@gmai.com"
+        git add *.csv
+        git commit -m "add chart csv" -a
+        git pull
+        git push origin master
+        
+        
