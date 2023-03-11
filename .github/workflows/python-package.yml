@@ -45,7 +45,7 @@ jobs:
         echo "pull"
         git pull
         echo "push"
-        git push origin master
+        git push origin main
         
     - name: chart update
       run: |
