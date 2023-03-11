@@ -53,7 +53,7 @@ jobs:
           git push origin main
         fi
         
-    - name: chart update
+    - name: chart days update
       run: |
         python chart.py
         if ! git diff --exit-code --quiet
@@ -64,4 +64,13 @@ jobs:
           git push origin main
         fi
         
-        
+    - name: chart minutes update
+      run: |
+        python chart_minutes.py
+        if ! git diff --exit-code --quiet
+        then
+          git add *.csv
+          git commit -m "update & add chart csv" -a
+          git pull
+          git push origin main
+        fi
