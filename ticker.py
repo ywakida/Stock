@@ -21,6 +21,7 @@ def update_tickers_csv():
     
     # 5ケタ以上は除く
     tickers_list = tickers_list[tickers_list.index < 10000]
+    tickers_list = tickers_list.tail(10)
      
     # Dataframeに列を追加
     tickers_list['出来高'] = 0
