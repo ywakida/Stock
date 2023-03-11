@@ -50,6 +50,7 @@ jobs:
           git add *.csv
           git commit -m "update ticker list" -a
           git pull
+          git config pull.rebase false
           git push origin main
         fi
         
@@ -73,5 +74,6 @@ jobs:
           git add *.csv
           git commit -m "update & add chart csv" -a
           git pull
+          git config pull.rebase false
           git push origin main
         fi
