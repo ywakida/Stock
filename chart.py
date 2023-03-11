@@ -71,7 +71,6 @@ if __name__ == "__main__":
     
     tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
-    # tickers_file = tickers_file.tail(100)
     for ticker, row in tickers_file.iterrows():
         folder = 'yfinance_csv'
         os.makedirs(folder, exist_ok=True) 
