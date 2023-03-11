@@ -45,13 +45,13 @@ jobs:
         # update ticker list
         python ticker.py
         git config core.filemode false
-        #if ! git diff --exit-code --quiet
-        #then
-        git add *.csv
-        git commit -m "update ticker list" -a
-        git pull
-        git push origin main
-        #fi
+        if ! git diff --exit-code --quiet
+        then
+          git add *.csv
+          git commit -m "update ticker list" -a
+          git pull
+          git push origin main
+        fi
         
     - name: chart update
       run: |
