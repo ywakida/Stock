@@ -33,6 +33,7 @@ jobs:
       run: |
         git config user.name "ywakida"
         git config user.email "y.wakida.business@gmai.com"
+        git config core.filemode false # ignore file permission
         
     - name: Install dependencies
       run: |
@@ -44,7 +45,6 @@ jobs:
       run: |
         # update ticker list
         python ticker.py
-        git config core.filemode false
         if ! git diff --exit-code --quiet
         then
           git add *.csv
@@ -56,7 +56,6 @@ jobs:
     - name: chart update
       run: |
         python chart.py
-        git config core.filemode false
         if ! git diff --exit-code --quiet
         then
           git add *.csv
