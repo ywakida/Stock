@@ -21,7 +21,7 @@ def update_tickers_csv():
     
     # 5ケタ以上は除く
     tickers_list = tickers_list[tickers_list.index < 10000]
-    tickers_list = tickers_list.head(300)
+    tickers_list = tickers_list.head(5000)
      
     # Dataframeに列を追加
     tickers_list['出来高'] = 0
@@ -34,12 +34,10 @@ def update_tickers_csv():
     for ticker, row in tickers_list.iterrows():
         # print(tickers_list.at[ticker,'発行株式'])        
         # print(tickers_list.at[ticker,'発行株式'] == 0)
-        print(ticker, ' begin:', datetime.datetime.now())
+        print(ticker, ' :', datetime.datetime.now())
         
         kabutan = Kabutan(ticker)
-     
-        print(ticker, ' half :', datetime.datetime.now())
-          
+               
         tickers_list.at[ticker,'出来高'] = kabutan.volume
         tickers_list.at[ticker,'売買代金'] = kabutan.tradingvalue
         tickers_list.at[ticker,'VWAP'] = kabutan.vwap
@@ -47,8 +45,7 @@ def update_tickers_csv():
         tickers_list.at[ticker,'時価総額'] = kabutan.capitalization
         tickers_list.at[ticker,'発行株式'] = kabutan.sharedunderstanding
         # print(tickers_list.at[ticker,'発行株式'])
-        print(ticker, ' end  :', datetime.datetime.now())
-    
+     
     # 保存
     tickers_list.to_csv(output_filename)    
     
