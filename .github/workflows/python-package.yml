@@ -13,7 +13,8 @@ on:
   workflow_dispatch:
   
   schedule:
-  - cron:  '00 01 * * *'
+  # every 7:00(UTC) = 16:00(JST)
+  - cron:  '00 07 * * *'
 jobs:
   build:
 
