@@ -56,9 +56,13 @@ jobs:
     - name: chart update
       run: |
         python chart.py
-        git add *.csv
-        git commit -m "update & add chart csv" -a
-        git pull
-        git push origin main
+        git config core.filemode false
+        if ! git diff --exit-code --quiet
+        then
+          git add *.csv
+          git commit -m "update & add chart csv" -a
+          git pull
+          git push origin main
+        fi
         
         
