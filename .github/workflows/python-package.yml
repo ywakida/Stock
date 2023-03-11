@@ -55,6 +55,6 @@ jobs:
         git add *.csv
         git commit -m "add chart csv" -a
         git pull
-        git push origin master
+        git push origin main
         
         
