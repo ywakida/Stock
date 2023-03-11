@@ -55,7 +55,7 @@ jobs:
         
     - name: chart days update
       run: |
-        python chart.py
+        python chart_days.py
         if ! git diff --exit-code --quiet
         then
           git add *.csv
