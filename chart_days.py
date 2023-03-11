@@ -34,7 +34,7 @@ def create_daily_chart_csv(folder_path, ticker):
 
         # ファイルにデータがある場合は、ファイル内の最新日付から本日までのデータを追加更新を実施する
         if len(daily_chart) > 1:
-            last_date = existed_chart.index[-1].date()
+            last_date = daily_chart.index[-1].date()
             # csvファイルの最新日付の翌日から本日までのデータを取得する
             today = datetime.date.today()
             delta_date = today - last_date
