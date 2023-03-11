@@ -44,10 +44,14 @@ jobs:
       run: |
         # update ticker list
         python ticker.py
-        git add -u
-        git commit -m "update ticker list" -a
-        git pull
-        git push origin main
+        git config core.filemode false
+        if ! git diff --exit-code --quiet
+        then
+          git add -u
+          git commit -m "update ticker list" -a
+          git pull
+          git push origin main
+        fi
         
     - name: chart update
       run: |
