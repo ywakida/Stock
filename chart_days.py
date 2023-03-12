@@ -50,7 +50,7 @@ def create_daily_chart_csv(folder_path, ticker):
                     daily_chart = pandas.concat([daily_chart, update_chart], sort=True)
                     daily_chart.drop_duplicates(keep='last', inplace=True) # 重複があれば最新で更新する
                     daily_chart.to_csv(file_name, header=True) # 保存
-                    print(f"{file_name} is updated {days} days")
+                    print(f"{file_name} is updated {delta_days} days")
 
         else:
         #   daily_chart = yfinance.download(tickers=f'{ticker}.T', period='max', progress=False)
