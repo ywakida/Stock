@@ -1,0 +1,58 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on: 
+#  push:
+#    branches: [ "main" ]
+    
+#  pull_request:
+#    branches: [ "main" ]
+  
+  workflow_dispatch:
+  
+  schedule:
+  # every saturday 3:00(UTC) = 12:00(JST)
+  - cron:  '0 3 * * 6'
+jobs:
+  csv_update:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+        
+    - name: git config
+      run: |
+        git config user.name "ywakida"
+        git config user.email "y.wakida.business@gmai.com"
+        git config core.filemode false # ignore file permission
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install yfinance pandas_datareader xlrd
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+    - name: ticker update
+      run: |
+        # update ticker list
+        python ticker.py
+
+    - name: git update
+      run: |
+        if ! git diff --exit-code --quiet
+        then
+          git add *.csv
+          git commit -m "update ticker list" -a
+          git pull
+          git config pull.rebase false
+          git push origin main
+        fi
