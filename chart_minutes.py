@@ -12,7 +12,7 @@ def task():
     # 銘柄一覧の読み出し
     csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
-
+    tickers_file = tickers_file.head(10)
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
         
