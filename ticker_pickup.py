@@ -86,7 +86,7 @@ if __name__ == "__main__":
     
     tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     
-    tickers_file = tickers_file.head(1000)
+#    tickers_file = tickers_file.head(1000)
     task(tickers_file)
 
  
