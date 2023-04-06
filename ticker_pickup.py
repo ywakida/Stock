@@ -28,18 +28,22 @@ def task(tickers_list):
         update_chart['VolumeDiff'] = update_chart['Volume'].diff()
         update_chart['VolumePreviousRatio'] = (update_chart['Volume'] / update_chart['Volume'].shift(1)).round(1)
         update_chart['VolumeSharesRatio'] = (update_chart['Volume'] / row['発行株式'] * 100).round(1)
+        update_chart['Rays'].mask((update_chart['Close'] > update_chart['Open']), 1, inplace=True)
+        update_chart['Rays'].mask((update_chart['Close'] < update_chart['Open']), -1, inplace=True)
         
         # print(update_chart)
         
         date = update_chart.index[-1]                
+        name = row['銘柄名']
         shares = row['発行株式']
         diff = update_chart.at[date, 'VolumeDiff']
         volume = update_chart.at[date, 'Volume']
         sharesratio = update_chart.at[date, 'VolumeSharesRatio']
         previousratio = update_chart.at[date, 'VolumePreviousRatio']
+        rays = update_chart.at[date, 'Rays']
 
         
-        test_chart = pandas.DataFrame({'volume':[volume], 'diff':[diff], 'sharesratio':[sharesratio], 'previousratio':[previousratio]}, index=[ticker])
+        test_chart = pandas.DataFrame({'name':[name], 'rays':[rays], 'volume':[volume], 'diff':[diff], 'sharesratio':[sharesratio], 'previousratio':[previousratio]}, index=[ticker])
     
         ticker_chart = pandas.concat([ticker_chart, test_chart], sort=False,)
         
