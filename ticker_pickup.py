@@ -14,7 +14,7 @@ def task(tickers_list):
     folder = 'yfinance_csv'
     for ticker, row in tickers_list.iterrows():
     
-        print('ticker: ', ticker)
+        #print('ticker: ', ticker)
         update_chart = pandas.DataFrame()
         try:
             update_chart = yfinance.download(tickers=f'{ticker}.T', period='3d', interval='1d', progress=False)
