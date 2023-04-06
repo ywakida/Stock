@@ -25,6 +25,7 @@ def task():
           if not chart1m.empty:
             if len(chart1m)>1:
               chart1m.to_csv(chart_savename)
+              print(chart_savename)
 
           folder = f'{basepath}chart5m1d'
           os.makedirs(folder, exist_ok=True) 
@@ -34,6 +35,7 @@ def task():
           if not chart5m.empty:
             if len(chart5m)>1:
               chart5m.to_csv(chart_savename)
+              print(chart_savename)
           
         except Exception:
           pass
