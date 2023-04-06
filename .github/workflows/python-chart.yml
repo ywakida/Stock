@@ -55,9 +55,10 @@ jobs:
         
     - name: git update
       run: |
-        git add *.csv
-        git commit -m "update & add chart csv" -a 
-        git config --global pull.rebase true # true:rebase false:merge
-        git pull
-        git push origin main
+         git add -A
+#        git add *.csv
+#        git commit -m "update & add chart csv" -a 
+#        git config --global pull.rebase true # true:rebase false:merge
+#        git pull
+#        git push origin main
         
