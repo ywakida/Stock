@@ -43,7 +43,12 @@ def create_daily_chart_csv(folder_path, ticker):
             if delta_days < 5:
                 delta_days = 5
           
-            update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
+            update_chart = pandas.DataFrame()        
+            try:
+                update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
+            except Exception:
+                pass
+            
           # update_chart = update_chart[:-1] # 末尾行は削除        
             if not update_chart.empty:
                 if len(update_chart) > 1:  
