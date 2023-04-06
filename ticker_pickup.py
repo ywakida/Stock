@@ -2,7 +2,6 @@ import pandas
 import datetime
 import os
 import yfinance
-import schedule
 import time
 import numpy
 
