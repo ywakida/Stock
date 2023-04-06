@@ -19,7 +19,7 @@ def task():
         try:
           folder = f'{basepath}chart1m1d'
           os.makedirs(folder, exist_ok=True) 
-          chart_savename = f'{folder}/{ticker}_1m.csv'          
+          chart_savename = f'{folder}/{ticker}.csv'          
           chart1m = pandas.DataFrame()
           chart1m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='1m', progress=False)
           if not chart1m.empty:
@@ -28,7 +28,7 @@ def task():
 
           folder = f'{basepath}chart5m1d'
           os.makedirs(folder, exist_ok=True) 
-          chart_savename = f'{folder}/{ticker}_5m.csv'
+          chart_savename = f'{folder}/{ticker}.csv'
           chart5m = pandas.DataFrame()        
           chart5m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='5m', progress=False)
           if not chart5m.empty:
