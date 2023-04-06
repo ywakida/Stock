@@ -28,6 +28,7 @@ def task(tickers_list):
         update_chart['VolumeDiff'] = update_chart['Volume'].diff()
         update_chart['VolumePreviousRatio'] = (update_chart['Volume'] / update_chart['Volume'].shift(1)).round(1)
         update_chart['VolumeSharesRatio'] = (update_chart['Volume'] / row['発行株式'] * 100).round(1)
+        update_chart['Rays'] = 0
         update_chart['Rays'].mask((update_chart['Close'] > update_chart['Open']), 1, inplace=True)
         update_chart['Rays'].mask((update_chart['Close'] < update_chart['Open']), -1, inplace=True)
         
