@@ -15,7 +15,7 @@ def task():
     tickers_file = tickers_file.head(10)
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
-        
+        print('ticker: ', ticker)
         try:
           folder = f'{basepath}chart1m1d'
           os.makedirs(folder, exist_ok=True) 
