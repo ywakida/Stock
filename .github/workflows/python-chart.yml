@@ -54,7 +54,7 @@ jobs:
         #then
           git add *.csv
           git commit -m "update & add chart csv" -a 
-          git config -- global pull.rebase true # true:rebase false:merge
+          git config --global pull.rebase true # true:rebase false:merge
           git pull
           git push origin main
         #fi
