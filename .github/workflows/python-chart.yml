@@ -30,9 +30,9 @@ jobs:
         python-version: "3.10"
     - name: git config
       run: |
-        git config user.name "ywakida"
-        git config user.email "y.wakida.business@gmai.com"
-        git config core.filemode false # ignore file permission
+        git config --global user.name "ywakida"
+        git config --global user.email "y.wakida.business@gmai.com"
+        git config --global core.filemode false # ignore file permission
         
     - name: Install dependencies
       run: |
