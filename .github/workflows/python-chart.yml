@@ -33,6 +33,7 @@ jobs:
         git config --global user.name "ywakida"
         git config --global user.email "y.wakida.business@gmai.com"
         git config --global core.filemode false # ignore file permission
+        git config --global pull.rebase true # true:rebase false:merge
         
     - name: Install dependencies
       run: |
@@ -42,23 +43,17 @@ jobs:
                 
     - name: chart days update
       run: |
-        #python chart_days.py
+        python chart_days.py
         
     - name: chart minutes update
       run: |
         python chart_minutes.py
-        git add -A
-        git status
-        git commit -m "update & add chart csv" -a 
-        git config --global pull.rebase true # true:rebase false:merge
-        git pull
-        git push origin main
 
     - name: git update
       run: |
-#        git add *.csv
-#        git commit -m "update & add chart csv" -a 
-#        git config --global pull.rebase true # true:rebase false:merge
-#        git pull
-#        git push origin main
+        #git add *.csv
+        git add -A
+        git commit -m "update & add chart csv" -a       
+        git pull
+        git push origin main
         
