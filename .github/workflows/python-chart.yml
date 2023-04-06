@@ -47,15 +47,11 @@ jobs:
     - name: chart minutes update
       run: |
         python chart_minutes.py
-        git add ./chart5m1d/*.csv
-        git commit -m "update & add chart csv" -a 
-        git config --global pull.rebase true # true:rebase false:merge
-        git pull
-        git push origin main
-        
+        git add -A
+        git status
+
     - name: git update
       run: |
-         git add -A
 #        git add *.csv
 #        git commit -m "update & add chart csv" -a 
 #        git config --global pull.rebase true # true:rebase false:merge
