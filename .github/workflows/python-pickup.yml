@@ -13,8 +13,17 @@ on:
   workflow_dispatch:
   
   schedule:
-  # every 5:00(UTC) = 14:00(JST)
-  - cron:  '00 05 * * *'
+  # every 5:00(UTC) = 14:00(JST) 平日のみ
+  - cron:  '00 05 * * 1-5'
+  # every 4:00(UTC) = 13:00(JST) 平日のみ
+  - cron:  '00 04 * * 1-5'
+  # every 3:00(UTC) = 12:00(JST) 平日のみ
+  - cron:  '00 03 * * 1-5'
+  # every 2:00(UTC) = 11:00(JST) 平日のみ
+  - cron:  '00 02 * * 1-5'
+  # every 1:00(UTC) = 10:00(JST) 平日のみ
+  - cron:  '00 01 * * 1-5'
+  
 jobs:
   build:
 
