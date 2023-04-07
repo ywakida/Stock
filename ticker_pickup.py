@@ -59,11 +59,11 @@ def task(tickers_list):
     
     ticker_chart = ticker_chart.sort_values(by='sharesratio', ascending=False)
     filename = f'volume_shares.csv'
-    ticker_chart.to_csv(file_name, header=True) # 保存
+    ticker_chart.to_csv(filename, header=True) # 保存
     
     ticker_chart = ticker_chart.sort_values(by='previousratio', ascending=False)
     filename = f'volume_previous.csv'
-    ticker_chart.to_csv(file_name, header=True) # 保存
+    ticker_chart.to_csv(filename, header=True) # 保存
     
         # chart_filename = f'{folder}/{ticker}.csv'
         # if os.path.exists(chart_filename):
