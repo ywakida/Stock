@@ -14,7 +14,7 @@ def create_tickers():
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    tickers_list = tickers_list.head(100)
+#     tickers_list = tickers_list.head(100)
 
     ticker_chart = pandas.DataFrame() 
 
