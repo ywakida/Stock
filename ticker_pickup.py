@@ -49,7 +49,7 @@ def create_tickers():
                          'Black', inplace=True)        
         
         
-        date = chart.index[-1].date()                
+        date = chart.index[-1]              
         name = row['銘柄名']
         shares = row['発行株式']
         diff = chart.at[date, '出来高前日差']
