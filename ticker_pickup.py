@@ -5,13 +5,20 @@ import yfinance
 import time
 import numpy
 
-ticker_file = pandas.DataFrame()
+chart_folder = 'yfinance_csv'
+todayspickup_folder = 'todayspickup'
+todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 
-def task(tickers_list):
+def create_tickers():
+    """ 本日の注目銘柄のマスターファイルを作成する
+    """ 
+    tickers_list = pandas.DataFrame()
+    tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    tickers_list = tickers_list.head(100)
 
     ticker_chart = pandas.DataFrame() 
 
-    folder = 'yfinance_csv'
+    folder = chart_folder
 
     for ticker, row in tickers_list.iterrows():
         print('ticker: ', ticker)
@@ -42,7 +49,7 @@ def task(tickers_list):
                          'Black', inplace=True)        
         
         
-        date = chart.index[-1]                
+        date = chart.index[-1].date()                
         name = row['銘柄名']
         shares = row['発行株式']
         diff = chart.at[date, '出来高前日差']
@@ -67,56 +74,27 @@ def task(tickers_list):
     ticker_chart = ticker_chart.replace([numpy.inf, -numpy.inf], numpy.nan)
     ticker_chart = ticker_chart.fillna(0) # 0でnanを置換
     
+    # 保存
+    os.makedirs(todayspickup_folder, exist_ok=True)  
+    ticker_chart.to_csv(todayspickup_filename, header=True)
+    
+    
+def change_view():
+    
+    tickers_list = pandas.read_csv(todayspickup_filename, header=0, index_col=0)
+    
     # print(ticker_chart.sort_values(by='出来高発行株式割合', ascending=False).head(100))
     # print('\n')
     # print(ticker_chart.sort_values(by='出来高前日比', ascending=False).head(100))
     
-    ticker_chart = ticker_chart.sort_values(by='出来高発行株式割合', ascending=False)
-    filename = f'volume_shares.csv'
+    tickers_list = tickers_list.sort_values(by='出来高発行株式割合', ascending=False)
+    filename = f'./{todayspickup_folder}/volume_shares.csv'
     ticker_chart.to_csv(filename, header=True) # 保存
 
-    ticker_chart = ticker_chart.sort_values(by='出来高前日比', ascending=False)
-    filename = f'volume_previous.csv'
+    tickers_list = tickers_list.sort_values(by='出来高前日比', ascending=False)
+    filename = f'./{todayspickup_folder}/volume_previous.csv'
     ticker_chart.to_csv(filename, header=True) # 保存
-    
-       # chart_filename = f'{folder}/{ticker}.csv'
 
-        # if os.path.exists(chart_filename):
-
-        #     print(f"{ticker}.csv is exsisted.")
-        
-
-        #     # open chart csv file
-
-        #     existed_chart = pandas.DataFrame()
-
-        #     existed_chart =  pandas.read_csv(chart_filename, index_col=0, parse_dates=True)
-            
-
-        #     update_chart = pandas.DataFrame()
-
-        #     update_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
-
-        #     print(update_chart)
-
-        #     # if not df_1d.empty:
-
-        #     #     chart =  pandas.concat([chart, df_1d], sort=True)
-                
-
-        #     if not update_chart.empty:
-
-        #         if len(update_chart) > 1:
-
-
-        #         daily_chart = pandas.concat([existed_chart, update_chart], sort=True)
-
-        #         daily_chart.drop_duplicates(keep='last', inplace=True) # 重複があれば最新で更新する
-
-        #         daily_chart.to_csv(file_name, header=True) # 保存
-
-        #         print(f"{file_name} is updated {delta_days} days")
-                
 
 if __name__ == "__main__":
     
@@ -127,7 +105,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
 
-    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     # tickers_file = tickers_file.head(200)
 
-    task(tickers_file)
+    create_tickers()
