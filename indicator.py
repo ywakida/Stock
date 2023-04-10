@@ -101,6 +101,9 @@ def add_heikinashi(chart):
     chart['HA_3V'] = 0
     chart['HA_3V'].mask((chart['HA_Close'] > chart['HA_Open']), 1, inplace=True)
     chart['HA_3V'].mask((chart['HA_Close'] < chart['HA_Open']), -1, inplace=True)
+    
+    # 平均足の実体差(=陽線、陰線判定)　陽線が>0, 陰線が<0
+    chart['HA_BodyDiff'] = chart['HA_Close'] - chart['HA_Open']
 
 def add_swing_high_low(chart, width=11):
     """スイングハイ、ローの検出
@@ -128,7 +131,16 @@ def add_before(chart, day=1):
     chart[f'LowBefore{day}'] = chart['Low'].shift(day)
     chart[f'CloseBefore{day}'] = chart['Close'].shift(day)
 
+def add_candlestick_pattern(chart, day=1):
+    """ローソク足のパターンの追加
 
+    Args:
+        chart (_type_): チャート
+        day (int, optional): day. Defaults to 1.
+    """
+    chart['BodyDiff'] = chart['Close'] - chart['Open'] # 実体の差分(陽線>0、陰線<0)
+    
+    
 
 if __name__ == "__main__":
     
