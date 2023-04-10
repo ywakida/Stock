@@ -89,11 +89,17 @@ def change_view():
     
     tickers_list = tickers_list.sort_values(by='出来高発行株式割合', ascending=False)
     filename = f'./{todayspickup_folder}/volume_shares.csv'
-    ticker_chart.to_csv(filename, header=True) # 保存
+    tickers_list[tickers_list['出来高発行株式割合']> 10].to_csv(filename, header=True) # 保存
 
     tickers_list = tickers_list.sort_values(by='出来高前日比', ascending=False)
     filename = f'./{todayspickup_folder}/volume_previous.csv'
-    ticker_chart.to_csv(filename, header=True) # 保存
+    tickers_list[tickers_list['出来高前日比']>2].to_csv(filename, header=True) # 保存
+
+    filename = f'./{todayspickup_folder}/akasanpei.csv'
+    tickers_list[tickers_list['三平']=='Red'].to_csv(filename, header=True) # 保存
+    
+    filename = f'./{todayspickup_folder}/kurosanpei.csv'
+    tickers_list[tickers_list['三平']=='Block'].to_csv(filename, header=True) # 保存
 
 
 if __name__ == "__main__":
@@ -107,4 +113,4 @@ if __name__ == "__main__":
 
     # tickers_file = tickers_file.head(200)
 
-    create_tickers()
+    change_view()
