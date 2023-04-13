@@ -4,7 +4,7 @@ import math
 import os
 
 
-def add_basic(chart, params=[5, 20, 25, 60, 75]):
+def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
     
     for param in params:
         # 単純移動平均 Simple moving average
@@ -113,10 +113,10 @@ def add_swing_high_low(chart, width=11):
         width (int, optional): _description_. Defaults to 5.
     """
     # 直近高値、直近安値の計算
-    chart[f'SwingHigh{width}'] = 0
-    chart[f'SwingHigh{width}'].mask((chart['High'].rolling(width, center=True).max() == chart['High']), chart['High'], inplace=True)
-    chart[f'SwingLow{width}'] = 0
-    chart[f'SwingLow{width}'].mask((chart['Low'].rolling(width, center=True).min() == chart['Low']), chart['Low'], inplace=True)
+    chart[f'SwingHigh'] = 0
+    chart[f'SwingHigh'].mask((chart['High'].rolling(width, center=True).max() == chart['High']), chart['High'], inplace=True)
+    chart[f'SwingLow'] = 0
+    chart[f'SwingLow'].mask((chart['Low'].rolling(width, center=True).min() == chart['Low']), chart['Low'], inplace=True)
 
 
 def add_before(chart, day=1):
@@ -131,49 +131,76 @@ def add_before(chart, day=1):
     chart[f'LowBefore{day}'] = chart['Low'].shift(day)
     chart[f'CloseBefore{day}'] = chart['Close'].shift(day)
 
-def add_candlestick_pattern(chart, day=1):
+def add_candlestick_pattern(chart):
     """ローソク足のパターンの追加
 
     Args:
         chart (_type_): チャート
         day (int, optional): day. Defaults to 1.
     """
-    chart['BodyDiff'] = chart['Close'] - chart['Open'] # 実体の差分(陽線>0、陰線<0)
+    # 実体の差分(陽線>0、陰線<0)
+    chart['BodyDiff'] = chart['Close'] - chart['Open']
+    chart['Ashi1'] = 'なし'
+    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']==chart['High']), '陽の丸坊主', inplace=True) # 強気線
+    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']<chart['High']), '陽の寄付坊主', inplace=True) # 強気線・上値暗示
+    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']==chart['High']), '陽の大引坊主', inplace=True) # 強気線・上値暗示
+    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']<chart['High']), 'コマ・陽の極線', inplace=True) # 迷い
     
+    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']==chart['High']), '陰の丸坊主', inplace=True) # 弱気線    
+    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']<chart['High']), '陰の大引坊主', inplace=True) # 弱気線・下値暗示
+    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']==chart['High']), '陰の寄付坊主', inplace=True) # 弱気線・下値暗示
+    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']<chart['High']), 'コマ・陰の極線', inplace=True) # 迷い
+    
+    chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
+    
+    
+    
+    # > : 連続陽線で実体がひとつ前より上がっている数
+    # < : 連続陰線で実体がひとつ前より下がっている数
+    chart['Hei'] = 0
+    chart['Hei'].mask((chart['Close'] > chart['Open']) & (chart['Close'].shift() > chart['Open'].shift()) & (chart['Close'] >= chart['Close'].shift()) & (chart['Open'] >= chart['Open'].shift()), 1, inplace=True)
+    chart['Hei'].mask((chart['Close'] < chart['Open']) & (chart['Close'].shift() < chart['Open'].shift()) & (chart['Close'] <= chart['Close'].shift()) & (chart['Open'] <= chart['Open'].shift()), -1, inplace=True)
+    y = chart['Hei'].groupby((chart['Hei'] != chart['Hei'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
+    chart['Hei'] = chart['Hei'] * y
     
 
+import chart_plot
 if __name__ == "__main__":
     
     os.system('cls')
 
-    # # pandasのprint表示の仕方を設定
-    # pandas.set_option('display.max_rows', None)
-    # pandas.set_option('display.max_columns', None)
-    # pandas.set_option('display.width', 1000)
+    # pandasのprint表示の仕方を設定
+    pandas.set_option('display.max_rows', None)
+    pandas.set_option('display.max_columns', None)
+    pandas.set_option('display.width', 1000)
     
-    # # currencies = ['USDJPY', 'EURJPY', 'GBPJPY', 'AUDJPY', 'EURUSD', 'GBPUSD', 'AUDUSD']
-    # currencies = ['USDJPY']
-    # for currency in currencies:
-    #     file_name = f'_chart_csv/{currency}_5m.csv'
-    #     if os.path.exists(file_name):
-            
-    #         chart_5m =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
-    #         add_heikinashi(chart_5m)
-            
-            
-    #     else:
-    #         print(f"{file_name} is not exsisted.")
-            
+    df = pandas.DataFrame(data=[0, 0, 1, 1, 1, -1, -1, -1, -1], columns=['value'])
     
+    y = df['value']
+    df['count'] = y.groupby((y != y.shift()).cumsum()).cumcount() + 1
+    df['value'] = df['count'] * df['value']
+    print(df)
+    
+    tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    tickers_list = tickers_list.head(100)
+
+    for ticker, row in tickers_list.iterrows():
+        folder = 'yfinance_csv'
         
-
-
-#       短期、中期、長期　
-# 1M,   5M,         20M,        60M
-# 5M,   25M,        100M=1H20M, 300M=5H
-# 15M,  75M=1H15M,  300M=5H,    900M=15H 
-# 1H,   5H,         20H,        60H=2D12H
-# 4H,   20H,        80H=3D8H,   240H=10D
-# 8H,   40H=1D16H,  160H=6D16H, 480H=20D
-# 1D,   5D,         20D,        60D
-# 1W,   20D=1M,     60D=3M,        120D=6M
+        chart_filename = f'{folder}/{ticker}.csv'
+        if os.path.exists(chart_filename):
+            print(f"{ticker}.csv is exsisted.")
+    
+            # open chart csv file
+            chart = pandas.DataFrame()
+            chart =  pandas.read_csv(chart_filename, index_col=0, parse_dates=True)
+            
+            add_candlestick_pattern(chart)
+            add_basic(chart)
+            add_swing_high_low(chart)
+            
+            # print(chart)
+            
+            save_filename = f'./html/{ticker}_.html'
+            chart_plot.plot_basicchart(save_filename, ticker, chart.tail(300), auto_open=False)
+                
