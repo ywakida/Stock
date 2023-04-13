@@ -60,6 +60,7 @@ jobs:
       run: |
         #git add *.csv
         git add -A
+        git status
         git commit -m "update & add chart csv" -a       
         git pull
         git push origin main
