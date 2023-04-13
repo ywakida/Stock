@@ -55,6 +55,7 @@ jobs:
     - name: chart analyze
       run: |
         python -c "import todayspickup; todayspickup.create_tickers()"
+        python -c "import todayspickup; todayspickup.change_view()"
 
     - name: git update
       run: |
