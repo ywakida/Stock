@@ -152,9 +152,10 @@ def add_candlestick_pattern(chart):
     chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
     
     chart['Ashi2'] = 'なし'
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open']>chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陰つつみ', inplace=True)
-    
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<=chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<=chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰つつみ', inplace=True)
     
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数

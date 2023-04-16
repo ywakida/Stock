@@ -35,6 +35,7 @@ def create_tickers(debug=False):
             continue 
             
         indicator.add_basic(chart, [5, 25, 75, 100])
+        indicator.add_swing_high_low(chart)
         # print(chart)
         indicator.add_candlestick_pattern(chart)
 
@@ -45,10 +46,19 @@ def create_tickers(debug=False):
         chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑', inplace=True)
         chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓', inplace=True)
         chart['75over'] = 0
-        chart['75over'].mask((chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
+        chart['75over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
         chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
+        chart['25over'] = 0
+        chart['25over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '1', inplace=True) # 突き抜け
+        chart['25over'].mask((chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '2', inplace=True) # 上
         
+        y = chart[chart['SwingHigh']>0]
+        takane = 0
+        if not y.empty:
+            takane = y.iloc[-1]['SwingHigh'] 
         
+        chart['Swinghighover'] = 0
+        chart['Swinghighover'].mask((chart['Close'] >= takane), '1', inplace=True)
         # chart['三平'] = 'None'
         # chart['三平'].mask(((chart['Close'] > chart['Open']) & (chart['Close'].shift(1) > chart['Open'].shift(1)) & (chart['Close'].shift(2) > chart['Open'].shift(2)) 
         #                   & (chart['High'] >= charｇt['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
@@ -71,6 +81,9 @@ def create_tickers(debug=False):
         sanpei = chart.at[date, 'Hei']
         ku = chart.at[date, 'Ku']
         over75 = chart.at[date, '75over']
+        ashi1 = chart.at[date, 'Ashi1']
+        ashi2 = chart.at[date, 'Ashi2']
+        swinghigh = chart.at[date, 'Swinghighover']
 
         test_chart = pandas.DataFrame({'銘柄名':[name], 
                                        '陽線陰線':[pn], 
@@ -81,6 +94,9 @@ def create_tickers(debug=False):
                                        '三平':[sanpei], 
                                        '空':[ku],
                                        '75越':[over75],
+                                       '足1':[ashi1],
+                                       '足2':[ashi2],
+                                       '直近高値越':[swinghigh],
                                        },
                                       index=[ticker])
     
