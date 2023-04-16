@@ -34,7 +34,7 @@ def create_tickers(debug=False):
         if chart.empty:
             continue 
             
-        indicator.add_basic(chart, [75])
+        indicator.add_basic(chart, [5, 25, 75, 100])
         # print(chart)
         indicator.add_candlestick_pattern(chart)
 
@@ -44,11 +44,14 @@ def create_tickers(debug=False):
         chart['陽線陰線'] = '→'
         chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑', inplace=True)
         chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓', inplace=True)
+        chart['75over'] = 0
+        chart['75over'].mask((chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
+        chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
         
         
         # chart['三平'] = 'None'
         # chart['三平'].mask(((chart['Close'] > chart['Open']) & (chart['Close'].shift(1) > chart['Open'].shift(1)) & (chart['Close'].shift(2) > chart['Open'].shift(2)) 
-        #                   & (chart['High'] >= chart['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
+        #                   & (chart['High'] >= charｇt['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
         #                   & (chart['Low'] >= chart['Low'].shift(1)) & (chart['Low'].shift(1) >= chart['Low'].shift(2))), 
         #                  'Red', inplace=True)
         # chart['三平'].mask(((chart['Close'] < chart['Open']) & (chart['Close'].shift(1) < chart['Open'].shift(1)) & (chart['Close'].shift(2) < chart['Open'].shift(2)) 
@@ -67,6 +70,7 @@ def create_tickers(debug=False):
         # sanpei = chart.at[date, '三平']
         sanpei = chart.at[date, 'Hei']
         ku = chart.at[date, 'Ku']
+        over75 = chart.at[date, '75over']
 
         test_chart = pandas.DataFrame({'銘柄名':[name], 
                                        '陽線陰線':[pn], 
@@ -75,7 +79,9 @@ def create_tickers(debug=False):
                                        '出来高発行株式割合':[sharesratio], 
                                        '出来高前日比':[previousratio],
                                        '三平':[sanpei], 
-                                       '空':[ku]},
+                                       '空':[ku],
+                                       '75越':[over75],
+                                       },
                                       index=[ticker])
     
         ticker_chart = pandas.concat([ticker_chart, test_chart], sort=False,)
@@ -120,6 +126,9 @@ def change_view(debug=False):
     tickers_list = tickers_list.sort_values(by='空', ascending=True)
     filename = f'./{todayspickup_folder}/kuro_ku.csv'
     tickers_list[tickers_list['空']<0].to_csv(filename, header=True) # 保存
+    
+    filename = f'./{todayspickup_folder}/over75day.csv'
+    tickers_list[tickers_list['75越']==1].to_csv(filename, header=True) # 保存
     
 if __name__ == "__main__":
     

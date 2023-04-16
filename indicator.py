@@ -151,6 +151,10 @@ def add_candlestick_pattern(chart):
     
     chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
     
+    chart['Ashi2'] = 'なし'
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open']>chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陰つつみ', inplace=True)
+    
     
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数
@@ -207,7 +211,5 @@ if __name__ == "__main__":
             add_swing_high_low(chart)
             add_heikinashi(chart)
             
-            
             save_filename = f'./html/{ticker}_.html'
-            chart_plot.plot_with_heikinashi_candlestick(save_filename, ticker, chart.tail(300), auto_open=False)
-                
+            chart_plot.plot_with_heikinashi_candlestick(save_filename, ticker, chart.tail(500), auto_open=False)

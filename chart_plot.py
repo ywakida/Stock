@@ -37,17 +37,8 @@ def remove_weekend(figure, chart):
     return figure
     
     
-def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
+def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}):
     """ろうそく足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     # y軸名を定義
     figure.update_yaxes(title_text="レート", row=row, col=col)
