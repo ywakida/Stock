@@ -16,7 +16,7 @@ def task():
     for ticker, row in tickers_file.iterrows():
         
         folder = f'{basepath}chart1m1d'
-        os.makedirs(folder, exist_ok=True) 
+        os.makedirs(folder, exist_ok=True)
         chart_savename = f'{folder}/{ticker}.csv'          
         chart1m = pandas.DataFrame()
         try:

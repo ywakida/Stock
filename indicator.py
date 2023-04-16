@@ -1,7 +1,7 @@
 import pandas
 import datetime
-import math
 import os
+import numpy
 
 
 def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
@@ -33,65 +33,63 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
         # シグマ値
         chart[f'SIGMA{param}'] = (chart[f'DR{param}'] - chart[f'DR{param}'].mean()) / chart[f'DR{param}'].std()
         
-        
-# def add_basic(chart, keys={"S":5, "M":20, "L":60, "LL":200}):
-#     """ 基本インジケータの追加
 
-#     Args:
-#         chart (_type_): _description_
-#         keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-#     """
-#     for key, value in keys.items():
-#         # 単純移動平均 Simple moving average
-#         chart[f'SMA{key}'] = chart['Close'].rolling(value).mean() # 5分足の短期移動平均
-        
-#         # 乖離率 Deviation rate
-#         chart[f'DR{key}']   = (chart['Close'] - chart[f'SMA{key}']) / chart[f'SMA{key}'] * 100
-       
-#         # 前日からの傾き
-#         chart[f'Slope{key}'] = chart[f'SMA{key}'].diff(1)
-        
-#         # 傾き変化量
-#         chart[f'SlopeSlope{key}'] = chart[f'Slope{key}'].diff(1)
-        
-#         # 指数移動平均
-#         chart[f'EMA{key}'] = chart['Close'].ewm(span=value, adjust=False).mean()
-        
-#         chart[f'Median{key}'] = chart['High'].rolling(value, center=True).median()
-        
-#         # ボリンジャーバンド
-#         chart[f'BB{key}P2'] = chart['Close'].rolling(value).mean() + 2 * chart['Close'].rolling(value).std(ddof = 0) # ddof = 0は母集団
-#         chart[f'BB{key}P1'] = chart['Close'].rolling(value).mean() + 1 * chart['Close'].rolling(value).std(ddof = 0) # ddof = 0は母集団
-#         chart[f'BB{key}M1'] = chart['Close'].rolling(value).mean() - 1 * chart['Close'].rolling(value).std(ddof = 0) # ddof = 0は母集団
-#         chart[f'BB{key}M2'] = chart['Close'].rolling(value).mean() - 2 * chart['Close'].rolling(value).std(ddof = 0) # ddof = 0は母集団
-        
-#         # 変則シグマ
-#         # chart[f'SIGMA{key}'] = (chart['Close'] - chart['Close'].rolling(value).mean()) / chart['Close'].rolling(value).std(ddof = 0)  # ddof = 0は母集団
-#         # chart[f'SIGMA{key}'].mask((chart[f'SIGMA{key}'] > 0), (chart['High'] - chart['Close'].rolling(value).mean()) / chart['Close'].rolling(value).std(ddof = 0), inplace=True)
-#         # chart[f'SIGMA{key}'].mask((chart[f'SIGMA{key}'] < 0), (chart['Low'] - chart['Close'].rolling(value).mean()) / chart['Close'].rolling(value).std(ddof = 0), inplace=True)
-#         # # chart[f'SIGMA{key}'] = chart[f'SIGMA{key}'].ewm(span=5, adjust=False).mean()
-        
-#         # シグマ値
-#         chart[f'SIGMA{key}'] = (chart[f'DR{key}'] - chart[f'DR{key}'].mean()) / chart[f'DR{key}'].std()
-        
 def add_volume(chart, window=5, day=1):
     
     # 平均出来高
     chart[f'Volume{window}'] = chart['Volume'].rolling(window).mean()
     chart[f'Volume{window}_{day}'] = chart[f'Volume{window}'].shift(day)
 
- 
+def calc_rci(prices):
+    """ RCI 計算関数
+    """
+    day_cnt = len(prices)
+    # 日付昇順ランク
+    rank_day = numpy.arange(day_cnt) + 1
+    # 株価昇順ランク
+    rank_price = numpy.array(pandas.Series(prices).rank())
+    rci = 1 - (6 * ((rank_day - rank_price)**2).sum()) / (day_cnt * (day_cnt**2 - 1))
+    return rci * 100 # パーセント値で返却
+
+def add_rci(chart, days=9):
+    """ RCIの追加
+    """        
+    chart['Rci'] = chart['Close'].rolling(days).apply(calc_rci, raw=True)
+
+def create_heikinashi(chart):
+    """平均足の追加
+    """
+    new_chart = pandas.DataFrame() 
+    
+    diff = 200
+    new_chart['Close'] = (chart['High'] + chart['Low'] + chart['Open'] + chart['Close']) / 4
+    new_chart['Open'] = (chart['Open'] + chart['Close']) / 2
+    new_chart['Open'] = chart['HA_Open'].shift(1) # 前回の値に変更
+    new_chart['High'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['High']], axis='columns').max(axis='columns') - diff
+    new_chart['Low'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['Low']], axis='columns').min(axis='columns') - diff
+    
+    new_chart['HA_Close'] = new_chart['HA_Close'] - diff
+    new_chart['HA_Open'] = new_chart['HA_Open'] - diff
+    
+    
+    # 平均足の陽線と陰線の反転
+    new_chart['HA_Reversal_Plus'] = (chart['HA_Close'] > chart['HA_Open']) & (chart['HA_Close'] < chart['HA_Open']).shift(1)
+    new_chart['HA_Reversal_Minus'] = (chart['HA_Close'] < chart['HA_Open']) & (chart['HA_Close'] > chart['HA_Open']).shift(1)
+    
+    return new_chart
+        
 def add_heikinashi(chart):
     """平均足の追加
-
-    Args:
-        chart (_type_): _description_
     """
+    diff = 200
     chart['HA_Close'] = (chart['High'] + chart['Low'] + chart['Open'] + chart['Close']) / 4
     chart['HA_Open'] = (chart['Open'] + chart['Close']) / 2
     chart['HA_Open'] = chart['HA_Open'].shift(1) # 前回の値に変更
-    chart['HA_High'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['High']], axis='columns').max(axis='columns')
-    chart['HA_Low'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['Low']], axis='columns').min(axis='columns')
+    chart['HA_High'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['High']], axis='columns').max(axis='columns') - diff
+    chart['HA_Low'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['Low']], axis='columns').min(axis='columns') - diff
+    chart['HA_Close'] = chart['HA_Close'] - diff
+    chart['HA_Open'] = chart['HA_Open'] - diff
+    
     
     # 平均足の陽線と陰線の反転
     chart['HA_Reversal_Plus'] = (chart['HA_Close'] > chart['HA_Open']) & (chart['HA_Close'] < chart['HA_Open']).shift(1)
@@ -154,14 +152,20 @@ def add_candlestick_pattern(chart):
     chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
     
     
-    
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数
     chart['Hei'] = 0
     chart['Hei'].mask((chart['Close'] > chart['Open']) & (chart['Close'].shift() > chart['Open'].shift()) & (chart['Close'] >= chart['Close'].shift()) & (chart['Open'] >= chart['Open'].shift()), 1, inplace=True)
     chart['Hei'].mask((chart['Close'] < chart['Open']) & (chart['Close'].shift() < chart['Open'].shift()) & (chart['Close'] <= chart['Close'].shift()) & (chart['Open'] <= chart['Open'].shift()), -1, inplace=True)
-    y = chart['Hei'].groupby((chart['Hei'] != chart['Hei'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
+    y = chart['Hei'].groupby((chart['Hei'] != chart['Hei'].shift()).cumsum()).cumcount() + 2 # 同じ数が連続している個数を算出
     chart['Hei'] = chart['Hei'] * y
+    
+    # 空
+    chart['Ku'] = 0
+    chart['Ku'].mask((chart['Low'] > chart['High'].shift()), 1, inplace=True)
+    chart['Ku'].mask((chart['High'] < chart['Low'].shift()), -1, inplace=True)
+    y = chart['Ku'].groupby((chart['Ku'] != chart['Ku'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
+    chart['Ku'] = chart['Ku'] * y
     
 
 import chart_plot
@@ -182,7 +186,7 @@ if __name__ == "__main__":
     print(df)
     
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    tickers_list = tickers_list.head(100)
+    tickers_list = tickers_list.head(1)
 
     for ticker, row in tickers_list.iterrows():
         folder = 'yfinance_csv'
@@ -195,12 +199,15 @@ if __name__ == "__main__":
             chart = pandas.DataFrame()
             chart =  pandas.read_csv(chart_filename, index_col=0, parse_dates=True)
             
-            add_candlestick_pattern(chart)
             add_basic(chart)
-            add_swing_high_low(chart)
+
+            add_candlestick_pattern(chart)
             
-            # print(chart)
+            add_rci(chart)
+            add_swing_high_low(chart)
+            add_heikinashi(chart)
+            
             
             save_filename = f'./html/{ticker}_.html'
-            chart_plot.plot_basicchart(save_filename, ticker, chart.tail(300), auto_open=False)
+            chart_plot.plot_with_heikinashi_candlestick(save_filename, ticker, chart.tail(300), auto_open=False)
                 

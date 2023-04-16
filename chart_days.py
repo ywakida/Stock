@@ -10,10 +10,6 @@ encode = 'utf-8'
  
 def create_daily_chart_csv(folder_path, ticker):
     """ 日足チャートのCSVの作成
-
-    Args:
-        folder_path (_type_): _description_
-        ticker (_type_): _description_
     """  
     file_name = f'{folder_path}/{ticker}.csv'   
     

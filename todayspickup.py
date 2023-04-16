@@ -4,33 +4,40 @@ import os
 import yfinance
 import time
 import numpy
+import indicator
 
 chart_folder = 'yfinance_csv'
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 
-def create_tickers():
+def create_tickers(debug=False):
     """ 本日の注目銘柄のマスターファイルを作成する
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-#     tickers_list = tickers_list.head(100)
+    # tickers_list = tickers_list.head(1)
 
     ticker_chart = pandas.DataFrame() 
 
     folder = chart_folder
 
     for ticker, row in tickers_list.iterrows():
-        print('ticker: ', ticker)
+        if debug == True:
+            print('ticker: ', ticker)
+            
         chart = pandas.DataFrame()
         try:
-            chart = yfinance.download(tickers=f'{ticker}.T', period='3d', interval='1d', progress=False)
+            chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
         except:
             pass
         
         if chart.empty:
             continue 
             
+        indicator.add_basic(chart, [75])
+        # print(chart)
+        indicator.add_candlestick_pattern(chart)
+
         chart['出来高前日差'] = chart['Volume'].diff()
         chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
         chart['出来高発行株式割合'] = (chart['Volume'] / row['発行株式'] * 100).round(1)
@@ -38,16 +45,16 @@ def create_tickers():
         chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑', inplace=True)
         chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓', inplace=True)
         
-        chart['三平'] = 'None'
-        chart['三平'].mask(((chart['Close'] > chart['Open']) & (chart['Close'].shift(1) > chart['Open'].shift(1)) & (chart['Close'].shift(2) > chart['Open'].shift(2)) 
-                          & (chart['High'] >= chart['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
-                          & (chart['Low'] >= chart['Low'].shift(1)) & (chart['Low'].shift(1) >= chart['Low'].shift(2))), 
-                         'Red', inplace=True)
-        chart['三平'].mask(((chart['Close'] < chart['Open']) & (chart['Close'].shift(1) < chart['Open'].shift(1)) & (chart['Close'].shift(2) < chart['Open'].shift(2)) 
-                          & (chart['High'] <= chart['High'].shift(1)) & (chart['High'].shift(1) <= chart['High'].shift(2))
-                          & (chart['Low'] <= chart['Low'].shift(1)) & (chart['Low'].shift(1) <= chart['Low'].shift(2))), 
-                         'Black', inplace=True)        
         
+        # chart['三平'] = 'None'
+        # chart['三平'].mask(((chart['Close'] > chart['Open']) & (chart['Close'].shift(1) > chart['Open'].shift(1)) & (chart['Close'].shift(2) > chart['Open'].shift(2)) 
+        #                   & (chart['High'] >= chart['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
+        #                   & (chart['Low'] >= chart['Low'].shift(1)) & (chart['Low'].shift(1) >= chart['Low'].shift(2))), 
+        #                  'Red', inplace=True)
+        # chart['三平'].mask(((chart['Close'] < chart['Open']) & (chart['Close'].shift(1) < chart['Open'].shift(1)) & (chart['Close'].shift(2) < chart['Open'].shift(2)) 
+        #                   & (chart['High'] <= chart['High'].shift(1)) & (chart['High'].shift(1) <= chart['High'].shift(2))
+        #                   & (chart['Low'] <= chart['Low'].shift(1)) & (chart['Low'].shift(1) <= chart['Low'].shift(2))), 
+        #                  'Black', inplace=True)        
         
         date = chart.index[-1]              
         name = row['銘柄名']
@@ -57,7 +64,9 @@ def create_tickers():
         sharesratio = chart.at[date, '出来高発行株式割合']
         previousratio = chart.at[date, '出来高前日比']
         pn = chart.at[date, '陽線陰線']   
-        sanpei = chart.at[date, '三平']
+        # sanpei = chart.at[date, '三平']
+        sanpei = chart.at[date, 'Hei']
+        ku = chart.at[date, 'Ku']
 
         test_chart = pandas.DataFrame({'銘柄名':[name], 
                                        '陽線陰線':[pn], 
@@ -65,7 +74,8 @@ def create_tickers():
                                        '出来高前日差':[diff], 
                                        '出来高発行株式割合':[sharesratio], 
                                        '出来高前日比':[previousratio],
-                                       '三平':[sanpei]}, 
+                                       '三平':[sanpei], 
+                                       '空':[ku]},
                                       index=[ticker])
     
         ticker_chart = pandas.concat([ticker_chart, test_chart], sort=False,)
@@ -79,7 +89,7 @@ def create_tickers():
     ticker_chart.to_csv(todayspickup_filename, header=True)
     
     
-def change_view():
+def change_view(debug=False):
     
     tickers_list = pandas.read_csv(todayspickup_filename, header=0, index_col=0)
     
@@ -95,13 +105,22 @@ def change_view():
     filename = f'./{todayspickup_folder}/volume_previous.csv'
     tickers_list[tickers_list['出来高前日比']>2].to_csv(filename, header=True) # 保存
 
+    tickers_list = tickers_list.sort_values(by='三平', ascending=False)
     filename = f'./{todayspickup_folder}/akasanpei.csv'
-    tickers_list[tickers_list['三平']=='Red'].to_csv(filename, header=True) # 保存
+    tickers_list[tickers_list['三平']>0].to_csv(filename, header=True) # 保存
     
+    tickers_list = tickers_list.sort_values(by='三平', ascending=True)
     filename = f'./{todayspickup_folder}/kurosanpei.csv'
-    tickers_list[tickers_list['三平']=='Block'].to_csv(filename, header=True) # 保存
+    tickers_list[tickers_list['三平']<0].to_csv(filename, header=True) # 保存
 
+    tickers_list = tickers_list.sort_values(by='空', ascending=False)
+    filename = f'./{todayspickup_folder}/aka_ku.csv'
+    tickers_list[tickers_list['空']>0].to_csv(filename, header=True) # 保存
 
+    tickers_list = tickers_list.sort_values(by='空', ascending=True)
+    filename = f'./{todayspickup_folder}/kuro_ku.csv'
+    tickers_list[tickers_list['空']<0].to_csv(filename, header=True) # 保存
+    
 if __name__ == "__main__":
     
     os.system('cls')
@@ -112,5 +131,5 @@ if __name__ == "__main__":
     pandas.set_option('display.width', 1000)
 
     # tickers_file = tickers_file.head(200)
-
+    create_tickers(True)
     change_view()
