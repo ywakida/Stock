@@ -38,6 +38,7 @@ def create_tickers(debug=False):
         indicator.add_swing_high_low(chart)
         # print(chart)
         indicator.add_candlestick_pattern(chart)
+        indicator.add_sma_pattern(chart)
 
         chart['出来高前日差'] = chart['Volume'].diff()
         chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
@@ -45,12 +46,12 @@ def create_tickers(debug=False):
         chart['陽線陰線'] = '→'
         chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑', inplace=True)
         chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓', inplace=True)
-        chart['75over'] = 0
-        chart['75over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
-        chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
-        chart['25over'] = 0
-        chart['25over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '1', inplace=True) # 突き抜け
-        chart['25over'].mask((chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '2', inplace=True) # 上
+        # chart['75over'] = 0
+        # chart['75over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
+        # chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
+        # chart['25over'] = 0
+        # chart['25over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '1', inplace=True) # 突き抜け
+        # chart['25over'].mask((chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '2', inplace=True) # 上
         
         y = chart[chart['SwingHigh']>0]
         takane = 0
@@ -80,7 +81,8 @@ def create_tickers(debug=False):
         # sanpei = chart.at[date, '三平']
         sanpei = chart.at[date, 'Hei']
         ku = chart.at[date, 'Ku']
-        over75 = chart.at[date, '75over']
+        over75 = chart.at[date, 'over75']
+        over25 = chart.at[date, 'over25']
         ashi1 = chart.at[date, 'Ashi1']
         ashi2 = chart.at[date, 'Ashi2']
         swinghigh = chart.at[date, 'Swinghighover']
@@ -93,7 +95,8 @@ def create_tickers(debug=False):
                                        '出来高前日比':[previousratio],
                                        '三平':[sanpei], 
                                        '空':[ku],
-                                       '75越':[over75],
+                                       '25SMA越':[over25],
+                                       '75SMA越':[over75],
                                        '足1':[ashi1],
                                        '足2':[ashi2],
                                        '直近高値越':[swinghigh],
@@ -143,8 +146,9 @@ def change_view(debug=False):
     filename = f'./{todayspickup_folder}/kuro_ku.csv'
     tickers_list[tickers_list['空']<0].to_csv(filename, header=True) # 保存
     
+    tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
     filename = f'./{todayspickup_folder}/over75day.csv'
-    tickers_list[tickers_list['75越']==1].to_csv(filename, header=True) # 保存
+    tickers_list[tickers_list['75SMA越']>0].to_csv(filename, header=True) # 保存
     
 if __name__ == "__main__":
     

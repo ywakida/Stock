@@ -129,6 +129,16 @@ def add_before(chart, day=1):
     chart[f'LowBefore{day}'] = chart['Low'].shift(day)
     chart[f'CloseBefore{day}'] = chart['Close'].shift(day)
 
+def add_sma_pattern(chart):
+    # 連続して、SMAを超えた回数をカウントする
+    for sma in [25, 75, 100]:
+        if f'SMA{sma}' in chart.columns:   
+            chart[f'over{sma}'] = 0
+            chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1, inplace=True)
+            y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
+            chart[f'over{sma}'] = chart[f'over{sma}'] * y
+
+        
 def add_candlestick_pattern(chart):
     """ローソク足のパターンの追加
 
@@ -156,6 +166,10 @@ def add_candlestick_pattern(chart):
     chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽つつみ', inplace=True)
     chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<=chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰つつみ', inplace=True)
     chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰つつみ', inplace=True)
+    
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽たすき', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰たすき', inplace=True)
+    
     
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数
