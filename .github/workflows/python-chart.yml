@@ -43,11 +43,11 @@ jobs:
                 
     - name: chart days update
       run: |
-        python chart_days.py
+        python -B chart_days.py
         
     - name: chart minutes update
       run: |
-        python chart_minutes.py
+        python -B chart_minutes.py
 
     - name: git update
       run: |
