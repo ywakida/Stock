@@ -8,7 +8,7 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
     
     for param in params:
         # 単純移動平均 Simple moving average
-        chart[f'SMA{param}'] = chart['Close'].rolling(param).mean()
+        chart[f'SMA{param}'] = chart['Close'].rolling(window=param, min_periods=1).mean()
         # chart[f'SMA{param}'].fillna(method='bfill', inplace=True)
         
         # 乖離率 Deviation rate
@@ -22,13 +22,13 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
         chart[f'SlopeSlope{param}'] = chart[f'Slope{param}'].diff(1)
         
         # 指数移動平均
-        chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False).mean()
+        chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False, min_periods=1).mean()
         
         # ボリンジャーバンド
-        chart[f'BB{param}P2'] = chart['Close'].rolling(param).mean() + 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
-        chart[f'BB{param}P1'] = chart['Close'].rolling(param).mean() + 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
-        chart[f'BB{param}M1'] = chart['Close'].rolling(param).mean() - 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
-        chart[f'BB{param}M2'] = chart['Close'].rolling(param).mean() - 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}P2'] = chart['Close'].rolling(window=param, min_periods=1).mean() + 2 * chart['Close'].rolling(window=param, min_periods=1).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}P1'] = chart['Close'].rolling(window=param, min_periods=1).mean() + 1 * chart['Close'].rolling(window=param, min_periods=1).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M1'] = chart['Close'].rolling(window=param, min_periods=1).mean() - 1 * chart['Close'].rolling(window=param, min_periods=1).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M2'] = chart['Close'].rolling(window=param, min_periods=1).mean() - 2 * chart['Close'].rolling(window=param, min_periods=1).std(ddof = 0) # ddof = 0は母集団
 
         # シグマ値
         chart[f'SIGMA{param}'] = (chart[f'DR{param}'] - chart[f'DR{param}'].mean()) / chart[f'DR{param}'].std()
