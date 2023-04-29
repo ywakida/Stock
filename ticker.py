@@ -4,7 +4,7 @@ import os
 import yfinance
 from kabutan import Kabutan
      
-def update_tickers_csv():
+def update_list():
     """
     銘柄リストを更新する
     """
@@ -56,6 +56,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
 
-    update_tickers_csv()
+    update_list()
 
             
