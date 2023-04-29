@@ -4,8 +4,9 @@ import pandas as pd
 
 class Kabutan():
     
-    def __init__(self, ticker):
+    def __init__(self, ticker, debug=False):
         
+        self.__debug = debug
         self.url = f'https://kabutan.jp/stock/?code={ticker}'
         self.volume = 0 # 出来高
         self.tradingvalue = 0 # 売買代金
@@ -52,12 +53,41 @@ class Kabutan():
                 self.high = int(list.loc['高値', 1])
                 self.low = int(list.loc['安値', 1])
                 self.close = int(list.loc['終値', 1])
+                
+                if self.__debug == True:
+                    print("ohlc: ", self.open, ", ", self.high, ", ", self.low, ", ", self.close)
             except Exception:
                 pass
+            
+        if len(data) <= 2:
+            if self.__debug == True:
+                print("false")
 
 if __name__ == "__main__":
-
-    kabutan = Kabutan(4169)
+    
+    kabutan = Kabutan(6730, True)
+    kabutan = Kabutan(6731, True)
+    kabutan = Kabutan(6734, True)
+    kabutan = Kabutan(6736, True)
+    kabutan = Kabutan(6737, True)
+    kabutan = Kabutan(6740, True)
+    kabutan = Kabutan(6741, True)
+    kabutan = Kabutan(6742, True)
+    kabutan = Kabutan(6743, True)
+    kabutan = Kabutan(6744, True)
+    kabutan = Kabutan(6745, True)
+    kabutan = Kabutan(6748, True)
+    kabutan = Kabutan(6750, True)
+    kabutan = Kabutan(6752, True)
+    kabutan = Kabutan(6753, True)
+    kabutan = Kabutan(6754, True)
+    kabutan = Kabutan(6755, True)
+    kabutan = Kabutan(6757, True)
+    kabutan = Kabutan(6758, True)
+    kabutan = Kabutan(6762, True)
+    kabutan = Kabutan(6763, True)
+    kabutan = Kabutan(6768, True)
+    kabutan = Kabutan(7120, True)
     
     # print(kabutan.sharedunderstanding)
     # print(kabutan.tradingvalue)
