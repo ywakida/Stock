@@ -61,9 +61,14 @@ jobs:
 
     - name: git update
       run: |
-        #git add *.csv
-        git add -A
-        git status
+        # git update
+        git add -A #.csv
+        git status --porcelain
+        if [ -n "$(git status --porcelain)" ]; then
+            echo "there are changes";
+        else
+            echo "no changes";
+        fi
         git commit -m "update & add chart csv" -a       
         git pull
         git push origin main
