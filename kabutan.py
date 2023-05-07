@@ -28,7 +28,7 @@ class Kabutan():
     def __load(self):
         data = pandas.read_html(self.url, index_col=0)
         
-        print("ticker: ", self.__ticker, ",len = ", len(data))
+        print("ticker:", self.__ticker, ",len = ", len(data))
         # print(data)
         
         if len(data) > 3:
@@ -38,10 +38,13 @@ class Kabutan():
                 print('OHLC:', list)
             
             if ('始値' in list.index) and ('高値' in list.index) and ('安値' in list.index) and ('終値' in list.index):
-                self.open = int(list.loc['始値', 1])
-                self.high = int(list.loc['高値', 1])
-                self.low = int(list.loc['安値', 1])
-                self.close = int(list.loc['終値', 1])
+                try:
+                    self.open = int(list.loc['始値', 1])
+                    self.high = int(list.loc['高値', 1])
+                    self.low = int(list.loc['安値', 1])
+                    self.close = int(list.loc['終値', 1])
+                except ValueError:
+                    print('ticker:', self.__ticker, ' OHLC値エラー')
         
         if len(data) > 4:
             list = data[4]
@@ -50,24 +53,42 @@ class Kabutan():
                 print('出来高・売買代金:', list)
             
             if '出来高' in list.index:
-                s = list.loc['出来高', 1].replace('株', '').replace(',', '')
-                self.volume = int(s)     
+                s = list.loc['出来高', 1].replace('株', '').replace(',', '').strip()
+                try:
+                    self.volume = int(s)
+                except ValueError:
+                    print('ticker:', self.__ticker, ' 出来高なし')
             if '売買代金' in list.index:                
-                s = list.loc['売買代金', 1].replace('百万円', '').replace(',', '')
-                self.tradingvalue = int(s) * 1000000        
+                s = list.loc['売買代金', 1].replace('百万円', '').replace(',', '').strip()
+                try:
+                    self.tradingvalue = int(s) * 1000000        
+                except ValueError:
+                    print('ticker:', self.__ticker, ' 売買代金なし')
             if 'VWAP' in list.index:
-                s = list.loc['VWAP', 1].replace('円', '').replace(',', '')
-                self.vwap = float(s)    
+                s = list.loc['VWAP', 1].replace('円', '').replace(',', '').strip()
+                try:
+                    self.vwap = float(s)    
+                except ValueError:
+                    print('ticker:', self.__ticker, ' VWAPなし')
             if '約定回数' in list.index:
-                s = list.loc['約定回数', 1].replace('回', '').replace(',', '')
-                self.tick = int(s)
+                s = list.loc['約定回数', 1].replace('回', '').replace(',', '').strip()
+                try:
+                    self.tick = int(s)
+                except ValueError:
+                    print('ticker:', self.__ticker, ' 約定回数なし')
             if '時価総額' in list.index:
-                s = list.loc['時価総額', 1].replace('億円', '').replace(',', '').replace('兆', '')
-                self.capitalization = int(float(s) * 100000000)
+                s = list.loc['時価総額', 1].replace('億円', '').replace(',', '').replace('兆', '').strip()
+                try:
+                    self.capitalization = int(float(s) * 100000000)
+                except ValueError:
+                    print('ticker:', self.__ticker, ' 時価総額なし')
             if '発行済株式数' in list.columns:
-                s = list.loc['発行済株式数', 1].replace('株', '').replace(',', '')
-                self.sharedunderstanding = int(s)
-            
+                s = list.loc['発行済株式数', 1].replace('株', '').replace(',', '').strip()
+                try:
+                    self.sharedunderstanding = int(s)
+                except ValueError:
+                    print('ticker:', self.__ticker, ' 発行済株式数なし')    
+                
         if len(data) > 6:
             list = data[6]
             list.index.name = '項目'
@@ -88,14 +109,13 @@ class Kabutan():
         
 if __name__ == "__main__":
     
-    kabutan = Kabutan(1000, True)
-    kabutan = Kabutan(1301, True)
+    # kabutan = Kabutan(1000, True)
+    # kabutan = Kabutan(1401, True)
+    #
     
-    # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-
-    # for ticker, row in tickers_file.iterrows():
-        
-    #     kabutan = Kabutan(ticker, True)
+    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    for ticker, row in tickers_file.iterrows():
+        kabutan = Kabutan(ticker, False)
         
 
     # print(kabutan.sharedunderstanding)
