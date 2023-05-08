@@ -28,7 +28,8 @@ class Kabutan():
     def __load(self):
         data = pandas.read_html(self.url, index_col=0)
         
-        print("ticker:", self.__ticker, ",len = ", len(data))
+        if self.__debug == True:
+            print("ticker:", self.__ticker, ",len = ", len(data))
         # print(data)
         
         if len(data) > 3:
