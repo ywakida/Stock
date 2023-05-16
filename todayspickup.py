@@ -19,8 +19,6 @@ def create_tickers(debug=False):
 
     ticker_chart = pandas.DataFrame() 
 
-    folder = chart_folder
-
     for ticker, row in tickers_list.iterrows():
         if debug == True:
             print('ticker: ', ticker)
@@ -53,7 +51,7 @@ def create_tickers(debug=False):
         # chart['25over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '1', inplace=True) # 突き抜け
         # chart['25over'].mask((chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '2', inplace=True) # 上
         
-        y = chart[chart['SwingHigh']>0]
+        y = chart[chart['SwingHigh'].notna()]
         takane = 0
         if not y.empty:
             takane = y.iloc[-1]['SwingHigh'] 

@@ -20,17 +20,21 @@ def create_tickers(debug=False):
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    tickers_list = tickers_list.head(1)
-
-    ticker_chart = pandas.DataFrame() 
-
-    folder = chart_folder
-
+    
+    count_Buy = 0
+    count_Up1 = 0
+    count_Up1_1 = 0
+    count_Up2 = 0
+    count_Up2_1 = 0
+    
     for ticker, row in tickers_list.iterrows():
+        # if ticker != 2138:
+        #     continue
+        
         if debug == True:
             print('ticker: ', ticker)
 
-        # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
+        # ファイルが存在しなければ、何もしない
         file_name = f'{chart_folder}/{ticker}.csv'   
         if not os.path.exists(file_name):
             continue
@@ -41,15 +45,40 @@ def create_tickers(debug=False):
         except:
             pass
 
-        indicator.add_basic(chart, [25])
+        chart = indicator.add_sma(chart, [5, 25, 75, 100, 200])
+        chart = indicator.add_sma_slope(chart, [5, 25, 75])
+        chart = indicator.add_swing_high_low(chart, 5, True)
+        chart = indicator.add_candlestick_pattern(chart)
+        # print(chart.tail(100))
         
-        period = 5
-        chart[f'max{period}'] = chart['High'].rolling(window=period, center=False, axis=0, min_periods=1).max().shift(-period)
-        chart[f'max{period}'].interpolate(methid='pad', inplace=True)
-        chart[f'min{period}'] = chart['Low'].rolling(window=period, center=False, axis=0, min_periods=1).min().shift(-period)
-        chart[f'min{period}'].interpolate(methid='pad', inplace=True)
+        chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Low'] < chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) #& (chart['Ashi2'] == '陽たすき')
         
-        print(chart.tail(30))
+        chart['Up1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close'])
+        chart['Up1_1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1))
+        chart['Up2'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close'])
+        chart['Up2_1'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1))
+        
+        count_Buy += chart['Buy'].sum()
+        count_Up1 += chart['Up1'].sum()
+        count_Up1_1 += chart['Up1_1'].sum()
+        count_Up2 += chart['Up2'].sum()
+        count_Up2_1 += chart['Up2_1'].sum()
+        
+    print('Buy:', count_Buy)
+    print('Up1:', count_Up1, ':', count_Up1_1)
+    print('Up2:', count_Up2, ':', count_Up2_1)
+    print('勝率1:', round(float(count_Up1)/count_Buy*100, 0), ' %')
+    print('勝率2:', round(count_Up2/count_Buy*100, 0), ' %')
+        # print(chart['Buy'].sum())
+        # print(chart['Up1'].sum())
+        # print(chart['Up2'].sum())
+        # period = 5
+        # chart[f'max{period}'] = chart['High'].rolling(window=period, center=False, axis=0, min_periods=1).max().shift(-period)
+        # chart[f'max{period}'].interpolate(methid='pad', inplace=True)
+        # chart[f'min{period}'] = chart['Low'].rolling(window=period, center=False, axis=0, min_periods=1).min().shift(-period)
+        # chart[f'min{period}'].interpolate(methid='pad', inplace=True)
+        
+        # print(chart.tail(1000))
     #     indicator.add_basic(chart, [5, 25, 75, 100])
     #     indicator.add_swing_high_low(chart)
     #     # print(chart)

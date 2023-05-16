@@ -1,8 +1,80 @@
 import pandas
-import datetime
 import os
 import numpy
 
+def add_sma(chart, params=[5, 25, 75]):
+    """ 単純移動平均線の追加
+    """
+    for param in params:
+        if not f'SMA{param}' in chart.columns:
+            chart[f'SMA{param}'] = chart['Close'].rolling(param).mean() 
+            
+    return chart
+
+def add_sma_dr(chart, params=[5, 25, 75]):
+    """ 単純移動平均線からの乖離率(%)
+    """
+    for param in params:
+        if f'SMA{param}' in chart.columns:
+            chart[f'SMADR{param}']   = (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}'] * 100
+            
+    return chart
+        
+def add_sma_slope(chart, params=[20], base=1):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'SMASlope{param}'] = chart[f'SMA{param}'].diff() * base
+    
+    return chart
+            
+def add_ema(chart, params=[5, 25, 75]):
+    """ 指数移動平均線の追加
+    """
+    for param in params:
+        if not f'EMA{param}' in chart.columns:
+            chart[f'EMA{param}'] = chart['Close'].ewm(span=param, adjust=False).mean()
+    
+    return chart
+        
+def add_ema_dr(chart, params=[5, 25, 75]):
+    """ 指数移動平均線からの乖離率(%)
+    """
+    for param in params:
+        if f'EMA{param}' in chart.columns:
+            chart[f'EMADR{param}']   = (chart['Close'] - chart[f'EMA{param}']) / chart[f'EMA{param}'] * 100
+
+    return chart
+
+def add_ema_slope(chart, params=[20], base=1):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'EMASlope{param}'] = chart[f'EMA{param}'].diff() * base
+
+    return chart
+
+def add_bb(chart, params=[5, 20, 60]):
+    """ ボリンジャーバンド
+    """
+    for param in params:
+        chart[f'BB{param}P2'] = chart['Close'].rolling(param).mean() + 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}P1'] = chart['Close'].rolling(param).mean() + 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M1'] = chart['Close'].rolling(param).mean() - 1 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+        chart[f'BB{param}M2'] = chart['Close'].rolling(param).mean() - 2 * chart['Close'].rolling(param).std(ddof = 0) # ddof = 0は母集団
+    
+    return chart
+
+def add_sigma(chart, params=[20]):
+    """ シグマ
+    """     
+    for param in params:
+        chart[f'SIGMA{param}'] = (chart['Close'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)  # ddof = 0は母集団 
+        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
+    
+    return chart 
 
 def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
     
@@ -32,13 +104,15 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
 
         # シグマ値
         chart[f'SIGMA{param}'] = (chart[f'DR{param}'] - chart[f'DR{param}'].mean()) / chart[f'DR{param}'].std()
-        
+    
+    return chart
 
 def add_volume(chart, window=5, day=1):
     
     # 平均出来高
     chart[f'Volume{window}'] = chart['Volume'].rolling(window).mean()
     chart[f'Volume{window}_{day}'] = chart[f'Volume{window}'].shift(day)
+    return chart
 
 def calc_rci(prices):
     """ RCI 計算関数
@@ -55,6 +129,7 @@ def add_rci(chart, days=9):
     """ RCIの追加
     """        
     chart['Rci'] = chart['Close'].rolling(days).apply(calc_rci, raw=True)
+    return chart
 
 def create_heikinashi(chart):
     """平均足の追加
@@ -102,8 +177,10 @@ def add_heikinashi(chart):
     
     # 平均足の実体差(=陽線、陰線判定)　陽線が>0, 陰線が<0
     chart['HA_BodyDiff'] = chart['HA_Close'] - chart['HA_Open']
-
-def add_swing_high_low(chart, width=11):
+    
+    return chart
+    
+def add_swing_high_low(chart, width=5, fill=False):
     """スイングハイ、ローの検出
 
     Args:
@@ -111,11 +188,17 @@ def add_swing_high_low(chart, width=11):
         width (int, optional): _description_. Defaults to 5.
     """
     # 直近高値、直近安値の計算
-    chart[f'SwingHigh'] = 0
-    chart[f'SwingHigh'].mask((chart['High'].rolling(width, center=True).max() == chart['High']), chart['High'], inplace=True)
-    chart[f'SwingLow'] = 0
-    chart[f'SwingLow'].mask((chart['Low'].rolling(width, center=True).min() == chart['Low']), chart['Low'], inplace=True)
+    window=width * 2 + 1
+    chart[f'SwingHigh'] = numpy.nan
+    chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'], inplace=True)
+    chart[f'SwingLow'] = numpy.nan
+    chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'], inplace=True)
 
+    if fill:
+        chart[f'SwingHigh'].fillna(method='ffill', inplace=True)
+        chart[f'SwingLow'].fillna(method='ffill', inplace=True)
+        
+    return chart
 
 def add_before(chart, day=1):
     """X日前の値
@@ -128,10 +211,13 @@ def add_before(chart, day=1):
     chart[f'HighBefore{day}'] = chart['High'].shift(day)
     chart[f'LowBefore{day}'] = chart['Low'].shift(day)
     chart[f'CloseBefore{day}'] = chart['Close'].shift(day)
+    
+    return chart
+    
 
-def add_sma_pattern(chart):
+def add_sma_pattern(chart, param=[25, 75, 100]):
     # 連続して、SMAを超えた回数をカウントする
-    for sma in [25, 75, 100]:
+    for sma in param:
         if f'SMA{sma}' in chart.columns:   
             chart[f'over{sma}'] = 0
             chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1, inplace=True)
@@ -186,6 +272,7 @@ def add_candlestick_pattern(chart):
     y = chart['Ku'].groupby((chart['Ku'] != chart['Ku'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
     chart['Ku'] = chart['Ku'] * y
     
+    return chart
 
 import chart_plot
 if __name__ == "__main__":
