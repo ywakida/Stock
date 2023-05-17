@@ -15,21 +15,25 @@ def create_tickers(debug=False):
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    # tickers_list = tickers_list.head(1)
+    # tickers_list = tickers_list.tail(150)
 
     ticker_chart = pandas.DataFrame() 
 
     for ticker, row in tickers_list.iterrows():
-        if debug == True:
-            print('ticker: ', ticker)
-            
+           
         chart = pandas.DataFrame()
         try:
-            chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+            if debug == False:
+                chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+            else:
+                file_name = f'{chart_folder}/{ticker}.csv'   
+                print('ticker: ', ticker, ' filename: ', file_name)
+                chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
         except:
             pass
         
         if chart.empty:
+            print('ticker: ', ticker, ' filename: ', file_name, ' is empty.')
             continue 
             
         indicator.add_basic(chart, [5, 25, 75, 100])
@@ -37,6 +41,8 @@ def create_tickers(debug=False):
         # print(chart)
         indicator.add_candlestick_pattern(chart)
         indicator.add_sma_pattern(chart)
+        indicator.add_rci(chart, 9)
+        indicator.add_sma_slope(chart)
 
         chart['出来高前日差'] = chart['Volume'].diff()
         chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
@@ -56,18 +62,14 @@ def create_tickers(debug=False):
         if not y.empty:
             takane = y.iloc[-1]['SwingHigh'] 
         
-        chart['Swinghighover'] = 0
-        chart['Swinghighover'].mask((chart['Close'] >= takane), '1', inplace=True)
-        # chart['三平'] = 'None'
-        # chart['三平'].mask(((chart['Close'] > chart['Open']) & (chart['Close'].shift(1) > chart['Open'].shift(1)) & (chart['Close'].shift(2) > chart['Open'].shift(2)) 
-        #                   & (chart['High'] >= charｇt['High'].shift(1)) & (chart['High'].shift(1) >= chart['High'].shift(2))
-        #                   & (chart['Low'] >= chart['Low'].shift(1)) & (chart['Low'].shift(1) >= chart['Low'].shift(2))), 
-        #                  'Red', inplace=True)
-        # chart['三平'].mask(((chart['Close'] < chart['Open']) & (chart['Close'].shift(1) < chart['Open'].shift(1)) & (chart['Close'].shift(2) < chart['Open'].shift(2)) 
-        #                   & (chart['High'] <= chart['High'].shift(1)) & (chart['High'].shift(1) <= chart['High'].shift(2))
-        #                   & (chart['Low'] <= chart['Low'].shift(1)) & (chart['Low'].shift(1) <= chart['Low'].shift(2))), 
-        #                  'Black', inplace=True)        
+        chart['Swinghighover'] = chart['Close'] > takane # 高値を超えた
+        # chart['Swinghighover'].mask((chart['Close'] >= takane), '1', inplace=True)
         
+        chart['Over75swinghigh'] = (chart['Swinghighover']) & (chart['crossdSMA75'])
+        chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75']> 0)
+        
+        print(chart['Rci'])
+        # 変数への格納
         date = chart.index[-1]              
         name = row['銘柄名']
         shares = row['発行株式']
@@ -84,22 +86,30 @@ def create_tickers(debug=False):
         ashi1 = chart.at[date, 'Ashi1']
         ashi2 = chart.at[date, 'Ashi2']
         swinghigh = chart.at[date, 'Swinghighover']
-
-        test_chart = pandas.DataFrame({'銘柄名':[name], 
-                                       '陽線陰線':[pn], 
-                                       '出来高':[volume], 
-                                       '出来高前日差':[diff], 
-                                       '出来高発行株式割合':[sharesratio], 
-                                       '出来高前日比':[previousratio],
-                                       '三平':[sanpei], 
-                                       '空':[ku],
-                                       '25SMA越':[over25],
-                                       '75SMA越':[over75],
-                                       '足1':[ashi1],
-                                       '足2':[ashi2],
-                                       '直近高値越':[swinghigh],
-                                       },
-                                      index=[ticker])
+        over75swinghigh = chart.at[date, 'Over75swinghigh']
+        hanpatsu75 = chart.at[date, 'Hanpatsu75']
+        
+        try:
+            test_chart = pandas.DataFrame({'銘柄名':[name], 
+                                        '陽線陰線':[pn], 
+                                        '出来高':[volume], 
+                                        '出来高前日差':[diff], 
+                                        '出来高発行株式割合':[sharesratio], 
+                                        '出来高前日比':[previousratio],
+                                        '三平':[sanpei], 
+                                        '空':[ku],
+                                        '25SMA越':[over25],
+                                        '75SMA越':[over75],
+                                        '足1':[ashi1],
+                                        '足2':[ashi2],
+                                        '直近高値越':[swinghigh],
+                                        '75SMAと直近高値越':over75swinghigh,
+                                        '直近高値':takane,
+                                        '75反発':hanpatsu75,
+                                        },
+                                        index=[ticker])
+        except Exception:
+            pass
     
         ticker_chart = pandas.concat([ticker_chart, test_chart], sort=False,)
 
@@ -148,15 +158,21 @@ def change_view(debug=False):
     filename = f'./{todayspickup_folder}/over75day.csv'
     tickers_list[tickers_list['75SMA越']>0].to_csv(filename, header=True) # 保存
     
+    filename = f'./{todayspickup_folder}/over75high.csv'
+    tickers_list[tickers_list['75SMAと直近高値越']==True].to_csv(filename, header=True) # 保存
+    
+    filename = f'./{todayspickup_folder}/hanpatsu75.csv'
+    tickers_list[tickers_list['75反発']==True].to_csv(filename, header=True) # 保存
+    
 if __name__ == "__main__":
     
     os.system('cls')
+    
 
     # pandasのprint表示の仕方を設定
     pandas.set_option('display.max_rows', None)
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
 
-    # tickers_file = tickers_file.head(200)
     create_tickers(True)
     change_view()

@@ -20,7 +20,7 @@ def add_sma_dr(chart, params=[5, 25, 75]):
             
     return chart
         
-def add_sma_slope(chart, params=[20], base=1):
+def add_sma_slope(chart, params=[5, 25, 75], base=1):
     """ シグマ
     """     
     for param in params:
@@ -223,6 +223,8 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1, inplace=True)
             y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
             chart[f'over{sma}'] = chart[f'over{sma}'] * y
+            
+            chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['SMA75']) & (chart['Open'] < chart['SMA75']) # True/False
 
         
 def add_candlestick_pattern(chart):
