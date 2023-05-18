@@ -68,7 +68,6 @@ def create_tickers(debug=False):
         chart['Over75swinghigh'] = (chart['Swinghighover']) & (chart['crossdSMA75'])
         chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75']> 0)
         
-        print(chart['Rci'])
         # 変数への格納
         date = chart.index[-1]              
         name = row['銘柄名']
@@ -161,6 +160,7 @@ def change_view(debug=False):
     filename = f'./{todayspickup_folder}/over75high.csv'
     tickers_list[tickers_list['75SMAと直近高値越']==True].to_csv(filename, header=True) # 保存
     
+    tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
     filename = f'./{todayspickup_folder}/hanpatsu75.csv'
     tickers_list[tickers_list['75反発']==True].to_csv(filename, header=True) # 保存
     
