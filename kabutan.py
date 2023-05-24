@@ -83,8 +83,9 @@ class Kabutan():
                     self.capitalization = int(float(s) * 100000000)
                 except ValueError:
                     print('ticker:', self.__ticker, ' 時価総額なし')
-            if '発行済株式数' in list.columns:
+            if '発行済株式数' in list.index:
                 s = list.loc['発行済株式数', 1].replace('株', '').replace(',', '').strip()
+                # print(s)
                 try:
                     self.sharedunderstanding = int(s)
                 except ValueError:
@@ -117,7 +118,7 @@ if __name__ == "__main__":
     tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     for ticker, row in tickers_file.iterrows():
         kabutan = Kabutan(ticker, False)
-        
+        print(kabutan.sharedunderstanding)
 
     # print(kabutan.sharedunderstanding)
     # print(kabutan.tradingvalue)
