@@ -224,7 +224,8 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
             chart[f'over{sma}'] = chart[f'over{sma}'] * y
             
-            chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['SMA75']) & (chart['Open'] < chart['SMA75']) # True/False
+            # SMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
+            chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
 
         
 def add_candlestick_pattern(chart):
