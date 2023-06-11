@@ -11,7 +11,7 @@ encode = 'utf-8'
 def create_daily_chart_csv(folder_path, ticker):
     """ 日足チャートのCSVの作成
     """  
-    file_name = f'{folder_path}/{ticker}.csv'   
+    file_name = f'{folder_path}/{ticker}.csv'
     
     # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
     if not os.path.exists(file_name):

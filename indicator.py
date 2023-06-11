@@ -24,7 +24,8 @@ def add_sma_slope(chart, params=[5, 25, 75], base=1):
     """ シグマ
     """     
     for param in params:
-        chart[f'SMASlope{param}'] = chart[f'SMA{param}'].diff() * base
+        if f'SMA{param}' in chart.columns:
+            chart[f'SMASlope{param}'] = chart[f'SMA{param}'].diff() * base
     
     return chart
             
@@ -50,7 +51,8 @@ def add_ema_slope(chart, params=[20], base=1):
     """ シグマ
     """     
     for param in params:
-        chart[f'EMASlope{param}'] = chart[f'EMA{param}'].diff() * base
+        if f'EMA{param}' in chart.columns:
+            chart[f'EMASlope{param}'] = chart[f'EMA{param}'].diff() * base
 
     return chart
 
@@ -182,10 +184,6 @@ def add_heikinashi(chart):
     
 def add_swing_high_low(chart, width=5, fill=False):
     """スイングハイ、ローの検出
-
-    Args:
-        chart (_type_): _description_
-        width (int, optional): _description_. Defaults to 5.
     """
     # 直近高値、直近安値の計算
     window=width * 2 + 1
