@@ -138,20 +138,29 @@ def create_heikinashi(chart):
     """
     new_chart = pandas.DataFrame() 
     
-    diff = 200
-    new_chart['Close'] = (chart['High'] + chart['Low'] + chart['Open'] + chart['Close']) / 4
-    new_chart['Open'] = (chart['Open'] + chart['Close']) / 2
-    new_chart['Open'] = chart['HA_Open'].shift(1) # 前回の値に変更
-    new_chart['High'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['High']], axis='columns').max(axis='columns') - diff
-    new_chart['Low'] = pandas.concat([chart['HA_Open'], chart['HA_Close'], chart['Low']], axis='columns').min(axis='columns') - diff
-    
-    new_chart['HA_Close'] = new_chart['HA_Close'] - diff
-    new_chart['HA_Open'] = new_chart['HA_Open'] - diff
-    
+    param = 3
+    if param == 0:
+        new_chart['Close'] = (chart['High'] + chart['Low'] + chart['Open'] + chart['Close']) / 4
+        new_chart['Open'] = (chart['Open'] + chart['Close']) / 2
+    else:
+        ad = True
+        new_chart['Close'] = (chart['High'].ewm(span=param, adjust=ad).mean() + chart['Low'].ewm(span=param, adjust=ad).mean() + chart['Open'].ewm(span=param, adjust=ad).mean() + chart['Close'].ewm(span=param, adjust=ad).mean()) / 4
+        new_chart['Open'] = (chart['Open'].ewm(span=param, adjust=ad).mean() + chart['Close'].ewm(span=param, adjust=ad).mean()) / 2
+
+    new_chart['Open'] = chart['Open'].shift(1) # 前回の値に変更
+    new_chart['High'] = pandas.concat([chart['Open'], chart['Close'], chart['High']], axis='columns').max(axis='columns')
+    new_chart['Low'] = pandas.concat([chart['Open'], chart['Close'], chart['Low']], axis='columns').min(axis='columns')
+
+    diff = 0
+    if diff != 0:
+        new_chart['Close'] = new_chart['Close'] - diff
+        new_chart['Open'] = new_chart['Open'] - diff
+        new_chart['High'] = new_chart['High'] - diff
+        new_chart['Low'] = new_chart['Low'] - diff    
     
     # 平均足の陽線と陰線の反転
-    new_chart['HA_Reversal_Plus'] = (chart['HA_Close'] > chart['HA_Open']) & (chart['HA_Close'] < chart['HA_Open']).shift(1)
-    new_chart['HA_Reversal_Minus'] = (chart['HA_Close'] < chart['HA_Open']) & (chart['HA_Close'] > chart['HA_Open']).shift(1)
+    new_chart['N2P'] = (chart['Close'] > chart['Open']) & (chart['Close'] < chart['Open']).shift(1) # Negative to Positive
+    new_chart['P2N'] = (chart['Close'] < chart['Open']) & (chart['Close'] > chart['Open']).shift(1) # Positive to Negative
     
     return new_chart
         

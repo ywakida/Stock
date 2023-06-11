@@ -60,11 +60,14 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
         if f'EMA{value}' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
  
-        if f'BB{value}P1' in chart.columns:
         # ボリンジャーバンド
+        if f'BB{value}P2' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}P1' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M1' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M2' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
            
     key = 'L'
@@ -82,16 +85,17 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
     # スイングハイ・スイングロー
     if 'SwingHigh' in chart.columns and 'SwingLow' in chart.columns:
         if 'SwingHigh' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)    
+            figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
+        if 'SwingLow' in chart.columns:
             figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
     
     # スケーリング機能
     if row==1:
         figure.update_layout(xaxis1_rangeslider=dict(visible=False))
-    
     if row==2:
         figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
-    
+    if row==3:
+        figure.update_layout(xaxis3_rangeslider=dict(visible=False))
     return figure
 
 
@@ -113,8 +117,7 @@ def add_rci(figure, chart, row=1, col=1):
     figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
     
     return figure
-    
-    
+      
 def add_heikinashi(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """平均足のプロット情報作成
 
@@ -196,6 +199,35 @@ def add_heikinashi_bar(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60,
     # figure.add_trace(go.Bar(x=chart[chart['HA_3V']<0].index, y=chart[chart['HA_3V']<0]['HA_3V'], name='平均足陰線', marker=dict(color='lime')), row=row, col=col)
       
     return figure
+
+def add_heikinashi2(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":200}):
+    """平均足のプロット情報作成
+
+    Args:
+        filename (_type_): _description_
+        currency (_type_): _description_
+        chart (_type_): _description_
+        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
+
+    Returns:
+        _type_: _description_
+    """   
+    # y軸名を定義
+    figure.update_yaxes(title_text="平均足", row=row, col=col)
+    
+    ###
+    # ろうそく足
+    figure.add_trace(go.Candlestick(x=chart.index, open=chart['Open'], high=chart['High'], low=chart['Low'], close=chart['Close'], name='Heikinashi', increasing_line_width=1, increasing_line_color='red', increasing_fillcolor='red', decreasing_line_width=1, decreasing_line_color='green', decreasing_fillcolor='green'), row=row, col=col )
+    
+    # スケーリング機能
+    if row==1:
+        figure.update_layout(xaxis1_rangeslider=dict(visible=False))
+    
+    if row==2:
+        figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
+    
+    return figure
+
 
 def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """乖離率の追加
@@ -427,6 +459,25 @@ def plot_with_heikinashi_bar(filename, title, chart, auto_open=False, keys={"S":
     # プロット
     plotly.offline.plot(fig, filename=filename, show_link=True, auto_open=auto_open)
 
+def plot_with_heikinashi_candlestick2(filename, title, ohlc, heikinashi, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
+    """平均足チャートとのプロット
+    """
+    # fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[1.0], x_title="Date")
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.5, 0.5], x_title="Date")
+    
+    # グラフの設定
+    fig = add_graphsetting(fig)
+    
+    # X軸から土日を除外する
+    fig = remove_weekend(fig, ohlc)
+    fig = remove_weekend(fig, heikinashi)
+    
+    fig = add_candlestick(fig, ohlc, 1, 1)
+    fig = add_heikinashi2(fig, heikinashi, 2, 1)
+
+    
+    # プロット
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
 def plot_5m_debug(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
     
@@ -815,7 +866,10 @@ if __name__ == "__main__":
         ohlc = indicator.add_basic(ohlc, param)
         ohlc = indicator.add_sma_dr(ohlc, param)
         ohlc = indicator.add_swing_high_low(ohlc)
+        heikinashi = indicator.create_heikinashi(ohlc)
         
         ohlc = ohlc.tail(500)
-        plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
+        heikinashi = heikinashi.tail(500)
+        # plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
+        plot_with_heikinashi_candlestick2(f'{htmlfolder}/{ticker}.html', ticker, ohlc, heikinashi)
         
