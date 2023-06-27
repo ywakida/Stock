@@ -231,8 +231,11 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
             chart[f'over{sma}'] = chart[f'over{sma}'] * y
             
-            # SMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
+            # 前日終値がSMAより低く、かつ、当日、始値がSMAより低いところから、終値がSMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
             chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
+            
+            # 陽線でも陰線でもよいが、SMAを超えたかを確認する
+            chart[f'crossdSMA2{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
 
         
 def add_candlestick_pattern(chart):
@@ -294,16 +297,18 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    df = pandas.DataFrame(data=[0, 0, 1, 1, 1, -1, -1, -1, -1], columns=['value'])
+    # df = pandas.DataFrame(data=[0, 0, 1, 1, 1, -1, -1, -1, -1], columns=['value'])
     
-    y = df['value']
-    df['count'] = y.groupby((y != y.shift()).cumsum()).cumcount() + 1
-    df['value'] = df['count'] * df['value']
-    print(df)
+    # y = df['value']
+    # df['count'] = y.groupby((y != y.shift()).cumsum()).cumcount() + 1
+    # df['value'] = df['count'] * df['value']
+    # print(df)
     
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    tickers_list = tickers_list.head(1)
-
+    # tickers_list = tickers_list.head(1)
+    tickers_list = tickers_list[tickers_list.index == 3374]
+    print(tickers_list)
+    
     for ticker, row in tickers_list.iterrows():
         folder = 'yfinance_csv'
         
@@ -315,13 +320,17 @@ if __name__ == "__main__":
             chart = pandas.DataFrame()
             chart =  pandas.read_csv(chart_filename, index_col=0, parse_dates=True)
             
+            # add_basic(chart)
+            # add_candlestick_pattern(chart)
+            # add_rci(chart)
+            # add_swing_high_low(chart)
+            # add_heikinashi(chart)
+            
+            chart = create_heikinashi(chart)
             add_basic(chart)
-
-            add_candlestick_pattern(chart)
             
-            add_rci(chart)
-            add_swing_high_low(chart)
-            add_heikinashi(chart)
             
-            save_filename = f'./html/{ticker}_.html'
-            chart_plot.plot_with_heikinashi_candlestick(save_filename, ticker, chart.tail(500), auto_open=False)
+            save_folder = 'html'
+            save_filename = f'./{save_folder}/{ticker}_.html'
+            os.makedirs(save_folder, exist_ok=True) 
+            chart_plot.plot_with_slope(save_filename, ticker, chart.tail(30), auto_open=False)

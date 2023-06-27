@@ -5,6 +5,7 @@ import yfinance
 import time
 import numpy
 import indicator
+import chart_plot
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
@@ -16,7 +17,7 @@ todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 
 def create_tickers(debug=False):
-    """ 本日の注目銘柄のマスターファイルを作成する
+    """ シミュレーション
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
@@ -49,20 +50,23 @@ def create_tickers(debug=False):
         chart = indicator.add_sma_slope(chart, [5, 25, 75])
         chart = indicator.add_swing_high_low(chart, 5, True)
         chart = indicator.add_candlestick_pattern(chart)
-        # print(chart.tail(100))
         
         chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Low'] < chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) #& (chart['Ashi2'] == '陽たすき')
         
-        chart['Up1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close'])
-        chart['Up1_1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1))
-        chart['Up2'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close'])
-        chart['Up2_1'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1))
+        chart['Up1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) # 翌日の高値
+        chart['Up1_1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1)) # 翌日の高値、かつ、陽線
+        chart['Up2'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) # 翌日の終値
+        chart['Up2_1'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1)) # 翌日の終値、かつ、陽線
         
         count_Buy += chart['Buy'].sum()
         count_Up1 += chart['Up1'].sum()
         count_Up1_1 += chart['Up1_1'].sum()
         count_Up2 += chart['Up2'].sum()
         count_Up2_1 += chart['Up2_1'].sum()
+        
+        save_filename = f'./simulation/{ticker}_.html'
+        # chart = indicator.add_bb(chart, [5, 25, 75, 100, 200])
+        chart_plot.plot_simulationchart(save_filename, ticker, chart, False)
         
     print('Buy:', count_Buy)
     print('Up1:', count_Up1, ':', count_Up1_1)

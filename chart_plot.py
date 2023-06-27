@@ -83,12 +83,11 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
   
     # スイングハイ・スイングロー
-    if 'SwingHigh' in chart.columns and 'SwingLow' in chart.columns:
-        if 'SwingHigh' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
-        if 'SwingLow' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
-    
+    if 'SwingHigh' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
+    if 'SwingLow' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
+
     # スケーリング機能
     if row==1:
         figure.update_layout(xaxis1_rangeslider=dict(visible=False))
@@ -96,6 +95,28 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
         figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
     if row==3:
         figure.update_layout(xaxis3_rangeslider=dict(visible=False))
+    return figure
+
+
+def add_volume(figure, chart, row=1, col=1):
+    """平均足のプロット情報作成
+
+    Args:
+        filename (_type_): _description_
+        currency (_type_): _description_
+        chart (_type_): _description_
+        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
+
+    Returns:
+        _type_: _description_
+    """
+    # y軸名を定義
+    figure.update_yaxes(title_text="出来高", row=row, col=col)
+    
+    # 15分足の平均足の色
+    if 'Volume' in chart.columns:
+        figure.add_trace(go.Bar(x=chart.index, y=chart['Volume'], name='出来高', showlegend=False), row=row, col=col)
+      
     return figure
 
 
@@ -308,7 +329,8 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     key = 'S'
     if keys.get(key) != None:
         value = keys.get(key)
-        # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{key}'], name=f'{value} Slope', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+        if f'Slope{value}' in chart.columns:    
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
 
     key = 'M'
     if keys.get(key) != None:
@@ -325,7 +347,7 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        if f'Slope{value}' in chart.columns:
+        if f'Slbbbbbbbbbbope{value}' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
       
     return figure
@@ -839,6 +861,89 @@ def plot_5ms_2window(filename, currency, chart, auto_open=False, keys={"S":5, "M
     # plotly.io.write_image(fig, f'{folder_path}/{ticker}.png')
     
     return fig
+
+def add_simulation(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}):
+    """ろうそく足のプロット情報作成
+    """
+    # y軸名を定義
+    figure.update_yaxes(title_text="レート", row=row, col=col)
+    
+    # ろうそく足
+    figure.add_trace(go.Candlestick(x=chart.index, open=chart['Open'], high=chart['High'], low=chart['Low'], close=chart['Close'], name='OHLC', increasing_line_width=1, increasing_line_color='red', increasing_fillcolor='red', decreasing_line_width=1, decreasing_line_color='lime', decreasing_fillcolor='lime'), row=row, col=col)
+    
+    # SMA
+    key = 'S'
+    if keys.get(key) != None:
+        value = keys.get(key)
+        if f'SMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='yellow', width=1)), row=row, col=col)
+
+    key = 'M'
+    if keys.get(key) != None:
+        value = keys.get(key)
+        if f'SMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
+ 
+        # ボリンジャーバンド
+        if f'BB{value}P2' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}P1' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M1' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if f'BB{value}M2' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+           
+    key = 'L'
+    if keys.get(key) != None:
+        value = keys.get(key)
+        if f'SMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='lime', width=1)), row=row, col=col)
+    
+    key = 'LL'
+    if keys.get(key) != None:
+        value = keys.get(key)
+        if f'SMA{value}' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
+  
+    # Buy or Sell
+    if 'Buy' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["Buy"]==True].index, y=chart[chart["Buy"]==True]["Low"]-10, name="買い", mode="markers", marker_symbol="arrow-up", marker_size=5, marker_color="white"), row=row, col=col)
+    if 'Sell' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart[chart["Sell"]==True].index, y=chart[chart["Sell"]==True]["High"]+10, name="売り", mode="markers", marker_symbol="arrow-down", marker_size=5, marker_color="white"), row=row, col=col)
+
+    # スケーリング機能
+    if row==1:
+        figure.update_layout(xaxis1_rangeslider=dict(visible=False))
+    if row==2:
+        figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
+    if row==3:
+        figure.update_layout(xaxis3_rangeslider=dict(visible=False))
+    return figure
+
+def plot_simulationchart(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
+    """ろうそく足のプロット
+
+    Args:
+        filename (_type_): _description_
+        currency (_type_): _description_
+        chart (_type_): _description_
+        auto_open (bool, optional): _description_. Defaults to False.
+        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
+    """
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
+
+    # グラフの設定
+    fig = add_graphsetting(fig)
+    
+    # X軸から土日を除外する
+    fig = remove_weekend(fig, chart)
+    
+    fig = add_simulation(fig, chart, 1, 1, keys)
+    fig = add_volume(fig, chart, 2, 1)
+    
+    # プロット
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
 
 if __name__ == "__main__":
