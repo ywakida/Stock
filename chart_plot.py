@@ -38,7 +38,7 @@ def remove_weekend(figure, chart):
     return figure
     
     
-def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}):
+def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}, show_swing=True, show_bollinger=True):
     """ろうそく足のプロット情報作成
     """
     # y軸名を定義
@@ -61,14 +61,15 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
  
         # ボリンジャーバンド
-        if f'BB{value}P2' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        if f'BB{value}P1' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        if f'BB{value}M1' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-        if f'BB{value}M2' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+        if show_bollinger:
+            if f'BB{value}P2' in chart.columns:
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+            if f'BB{value}P1' in chart.columns:
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+            if f'BB{value}M1' in chart.columns:
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
+            if f'BB{value}M2' in chart.columns:
+                figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
            
     key = 'L'
     if keys.get(key) != None:
@@ -83,10 +84,11 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
   
     # スイングハイ・スイングロー
-    if 'SwingHigh' in chart.columns:
-        figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
-    if 'SwingLow' in chart.columns:
-        figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
+    if show_swing:
+        if 'SwingHigh' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"].notna()].index, y=chart[chart["SwingHigh"].notna()]["High"]*1.0002, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
+        if 'SwingLow' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9998, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
 
     # スケーリング機能
     if row==1:
@@ -944,7 +946,7 @@ def plot_simulationchart(filename, currency, chart, auto_open=False, keys={"S":5
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
-
+    
 
 if __name__ == "__main__":
     import indicator    

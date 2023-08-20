@@ -21,6 +21,8 @@ def create_tickers(debug=False):
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    # tickers_list = tickers_list[tickers_list.index == 2934] # Jフロンティア
+    tickers_list = tickers_list[tickers_list.index == 2437] # シンワワイズ
     
     count_Buy = 0
     count_Up1 = 0
@@ -28,10 +30,10 @@ def create_tickers(debug=False):
     count_Up2 = 0
     count_Up2_1 = 0
     
+    
     for ticker, row in tickers_list.iterrows():
         # if ticker != 2138:
         #     continue
-        
         if debug == True:
             print('ticker: ', ticker)
 
@@ -50,9 +52,36 @@ def create_tickers(debug=False):
         chart = indicator.add_sma_slope(chart, [5, 25, 75])
         chart = indicator.add_swing_high_low(chart, 5, True)
         chart = indicator.add_candlestick_pattern(chart)
+        chart = indicator.add_sma_pattern(chart)
         
-        chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Low'] < chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) #& (chart['Ashi2'] == '陽たすき')
+        # 買いの条件
+        # chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Low'] < chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) #& (chart['Ashi2'] == '陽たすき')
+        chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) & (chart['Close'].shift() < chart['SMA75'])
+        # chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Close'] > chart['SwingHigh'])
         
+        # 買い時のプライス情報
+        chart['BuyClose'] = numpy.nan
+        chart['BuyClose'].mask(chart['Buy'], chart['Close'], inplace=True)
+        chart['BuyClose'].fillna(method='ffill', inplace=True)
+        chart['BuyOpen'] = numpy.nan
+        chart['BuyOpen'].mask(chart['Buy'], chart['Open'], inplace=True)
+        chart['BuyOpen'].fillna(method='ffill', inplace=True)        
+        chart['BuyHigh'] = numpy.nan
+        chart['BuyHigh'].mask(chart['Buy'], chart['High'], inplace=True)
+        chart['BuyHigh'].fillna(method='ffill', inplace=True)        
+        chart['BuyLow'] = numpy.nan
+        chart['BuyLow'].mask(chart['Buy'], chart['Low'], inplace=True)
+        chart['BuyLow'].fillna(method='ffill', inplace=True)        
+        
+        # ロスカット条件
+        chart['Sell'] = (chart['Close'] < chart['BuyLow']) & (chart['Close'].shift() >= chart['BuyLow']) # 買ったときの安値を終値が下回ったとき
+        chart['Sell'] |= (chart['Close'] < chart['SMA75']) & (chart['Close'].shift() >= chart['SMA75']) # または、SMAを下回ったとき
+        
+
+    
+        print(chart[['Buy', 'Sell', 'SwingHigh', 'BuyClose', 'BuyLow', 'UnderUp', 'UnderUpHigh']].tail(2000))
+        
+                 
         chart['Up1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) # 翌日の高値
         chart['Up1_1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1)) # 翌日の高値、かつ、陽線
         chart['Up2'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) # 翌日の終値
