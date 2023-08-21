@@ -38,7 +38,7 @@ def remove_weekend(figure, chart):
     return figure
     
     
-def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}, show_swing=True, show_bollinger=True):
+def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}, show_swing=True, show_bollinger=True, show_order=False):
     """ろうそく足のプロット情報作成
     """
     # y軸名を定義
@@ -90,6 +90,12 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
         if 'SwingLow' in chart.columns:
             figure.add_trace(go.Scatter(x=chart[chart["SwingLow"].notna()].index, y=chart[chart["SwingLow"].notna()]["Low"]*0.9998, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
 
+    if show_order:
+        if 'Buy' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart[chart["Buy"]].index, y=chart[chart["Buy"]]["High"]*1.0002, name="買い", mode="markers", marker_symbol="arrow-right", marker_size=5, marker_color="white"), row=row, col=col)
+        if 'Sell' in chart.columns:
+            figure.add_trace(go.Scatter(x=chart[chart["Sell"]].index, y=chart[chart["Sell"]]["Low"]*0.9998, name="売り", mode="markers", marker_symbol="arrow-left", marker_size=5, marker_color="white"), row=row, col=col)
+            
     # スケーリング機能
     if row==1:
         figure.update_layout(xaxis1_rangeslider=dict(visible=False))
@@ -373,7 +379,7 @@ def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     # X軸から土日を除外する
     fig = remove_weekend(fig, chart)
     
-    fig = add_candlestick(fig, chart, 1, 1, keys)
+    fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=False, show_order=True)
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)

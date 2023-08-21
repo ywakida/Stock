@@ -252,10 +252,10 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             chart[f'UnderUpHigh'].fillna(chart['UnderUp'][-1], inplace=True)
         
             # 前日終値がSMAより低く、かつ、当日、始値がSMAより低いところから、終値がSMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
-            chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
+            # chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
             
             # 陽線でも陰線でもよいが、SMAを超えたかを確認する
-            chart[f'crossdSMA2{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
+            chart[f'crossdSMA{sma}'] = (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
 
     return chart
         
@@ -327,8 +327,9 @@ if __name__ == "__main__":
     
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     # tickers_list = tickers_list.head(1)
-    # tickers_list = tickers_list[tickers_list.index == 2934]
-    tickers_list = tickers_list[tickers_list.index == 6573]
+    tickers_list = tickers_list[tickers_list.index == 2934]
+    # tickers_list = tickers_list[tickers_list.index == 6573] # アジャイル
+    # tickers_list = tickers_list[tickers_list.index == 4934]
     print(tickers_list)
     
     for ticker, row in tickers_list.iterrows():
@@ -345,7 +346,7 @@ if __name__ == "__main__":
         
             chart.sort_index(inplace=True)
             chart = chart[~chart.index.duplicated(keep='last')]
-            print(chart.tail(100))    
+            # print(chart.tail(100))    
 
             add_basic(chart)
 
@@ -354,7 +355,7 @@ if __name__ == "__main__":
 
             
             add_rci(chart)
-            add_swing_high_low(chart, width=2, only_entitiy=False)
+            add_swing_high_low(chart, width=2, only_entitiy=True, fill=True)
             # add_heikinashi(chart)
             add_candlestick_pattern(chart)
             add_sma_pattern(chart)
@@ -363,7 +364,7 @@ if __name__ == "__main__":
             
             # chart = create_heikinashi(chart)
             # add_basic(chart)
-            
+            chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Open']) & (chart['SwingHigh'] < chart['Close'])
             
             save_folder = 'html'
             save_filename = f'./{save_folder}/{ticker}_.html'

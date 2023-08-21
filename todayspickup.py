@@ -49,15 +49,19 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                 file_name = f'{chart_folder}/{ticker}.csv'   
                 print('ticker: ', ticker, ' filename: ', file_name)
                 chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                
         except:
             pass
         
         if chart.empty:
             print('ticker: ', ticker, ' filename: ', file_name, ' is empty.')
             continue 
+        
+        chart.sort_index(inplace=True)
+        chart = chart[~chart.index.duplicated(keep='last')]
             
         indicator.add_basic(chart, [5, 25, 75, 100])
-        indicator.add_swing_high_low(chart)
+        indicator.add_swing_high_low(chart, width=3, only_entitiy=True)
         # print(chart)
         indicator.add_candlestick_pattern(chart)
         indicator.add_sma_pattern(chart)
@@ -201,8 +205,9 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2023, 6, 2).date()
+    date2 = datetime.datetime(2023, 7, 28).date()
     print(date2)
     # test(date2)
-    # create_tickers(datetime.datetime.today().date(),True)
+    create_tickers(datetime.datetime.today().date(),True)
+    # create_tickers(date2,True)
     change_view()
