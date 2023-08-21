@@ -385,6 +385,25 @@ def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M"
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
 
+def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
+    """乖離率とのプロット
+    """
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
+    
+    # グラフの設定
+    fig = add_graphsetting(fig)
+    
+    # X軸から土日を除外する
+    fig = remove_weekend(fig, chart)
+    
+    fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=False, show_order=True)
+    fig = add_rci(fig, chart, 2, 1)
+    
+    # プロット
+    # plotly.offline.plot(fig, auto_open=auto_open, image = 'png', image_filename='plot_image', output_type='file', image_width=800, image_height=600)
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+    
+
 def plot_with_dr(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
     """乖離率とのプロット
 

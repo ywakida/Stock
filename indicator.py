@@ -327,9 +327,12 @@ if __name__ == "__main__":
     
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     # tickers_list = tickers_list.head(1)
-    tickers_list = tickers_list[tickers_list.index == 2934]
+    # tickers_list = tickers_list[tickers_list.index == 2934]
     # tickers_list = tickers_list[tickers_list.index == 6573] # アジャイル
-    # tickers_list = tickers_list[tickers_list.index == 4934]
+    # tickers_list = tickers_list[tickers_list.index == 4934] # プレミアアンチエイジング
+    # tickers_list = tickers_list[tickers_list.index == 1605] # INPEX
+    tickers_list = tickers_list[tickers_list.index == 4263] # サスメド
+    # tickers_list = tickers_list[tickers_list.index == 9522] # リニューアルブル 
     print(tickers_list)
     
     for ticker, row in tickers_list.iterrows():
@@ -364,9 +367,9 @@ if __name__ == "__main__":
             
             # chart = create_heikinashi(chart)
             # add_basic(chart)
-            chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Open']) & (chart['SwingHigh'] < chart['Close'])
+            chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Close'])
             
             save_folder = 'html'
             save_filename = f'./{save_folder}/{ticker}_.html'
             os.makedirs(save_folder, exist_ok=True) 
-            chart_plot.plot_basicchart(save_filename, ticker, chart.tail(100), auto_open=False)
+            chart_plot.plot_with_rci(save_filename, ticker, chart.tail(100), auto_open=False)
