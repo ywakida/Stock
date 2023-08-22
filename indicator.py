@@ -331,8 +331,11 @@ if __name__ == "__main__":
     # tickers_list = tickers_list[tickers_list.index == 6573] # アジャイル
     # tickers_list = tickers_list[tickers_list.index == 4934] # プレミアアンチエイジング
     # tickers_list = tickers_list[tickers_list.index == 1605] # INPEX
-    tickers_list = tickers_list[tickers_list.index == 4263] # サスメド
+    # tickers_list = tickers_list[tickers_list.index == 4263] # サスメド
+    # tickers_list = tickers_list[tickers_list.index == 3778] # さくらインターネット
     # tickers_list = tickers_list[tickers_list.index == 9522] # リニューアルブル 
+    # tickers_list = tickers_list[tickers_list.index == 6194] # アトラエ
+    
     print(tickers_list)
     
     for ticker, row in tickers_list.iterrows():
