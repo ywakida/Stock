@@ -190,7 +190,7 @@ def create_tickers(debug=False):
     # # 保存
     # os.makedirs(todayspickup_folder, exist_ok=True)  
     # ticker_chart.to_csv(todayspickup_filename, header=True)
-    
+
     
 def change_view(debug=False):
     

@@ -323,9 +323,10 @@ if __name__ == "__main__":
     # y = df['value']
     # df['count'] = y.groupby((y != y.shift()).cumsum()).cumcount() + 1
     # df['value'] = df['count'] * df['value']
-    # print(df)
+    # print(df)    
     
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    # tickers_list = pandas.read_csv('todayspickup/over75high.csv', header=0, index_col=0)
     # tickers_list = tickers_list.head(1)
     # tickers_list = tickers_list[tickers_list.index == 2934]
     # tickers_list = tickers_list[tickers_list.index == 6573] # アジャイル
@@ -335,6 +336,7 @@ if __name__ == "__main__":
     # tickers_list = tickers_list[tickers_list.index == 3778] # さくらインターネット
     # tickers_list = tickers_list[tickers_list.index == 9522] # リニューアルブル 
     # tickers_list = tickers_list[tickers_list.index == 6194] # アトラエ
+    tickers_list = tickers_list[tickers_list.index == 4435] # カオナビ
     
     print(tickers_list)
     
@@ -368,10 +370,12 @@ if __name__ == "__main__":
             # print(chart[['High', 'SwingHigh']].tail(100))
             
             
+            
             # chart = create_heikinashi(chart)
             # add_basic(chart)
             chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Close'])
             
+            add_swing_high_low(chart, width=2, only_entitiy=True, fill=False)
             save_folder = 'html'
             save_filename = f'./{save_folder}/{ticker}_.html'
             os.makedirs(save_folder, exist_ok=True) 

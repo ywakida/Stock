@@ -1,23 +1,23 @@
 # pip install beautifulsoup4 lxml html5lib
 
 import pandas
+import lxml
 from lxml import html
 import requests
-import json
 from bs4 import BeautifulSoup
 
-class Kabutan():
+class Gfinance():
     
     def __init__(self, ticker, debug=False):
         
         self.__debug = debug
         self.url = f'https://www.google.com/finance/quote/{ticker}:TYO'
-        self.volume = 0 # 出来高
-        self.tradingvalue = 0 # 売買代金
-        self.vwap = 0.0 # VWAP
-        self.tick = 0 # ティック数
+        # self.volume = 0 # 出来高
+        # self.tradingvalue = 0 # 売買代金
+        # self.vwap = 0.0 # VWAP
+        # self.tick = 0 # ティック数
         self.capitalization = 0 # 時価総額
-        self.sharedunderstanding = 0 # 発行株式
+        # self.sharedunderstanding = 0 # 発行株式
         self.open = 0
         self.high = 0
         self.low = 0
@@ -121,56 +121,51 @@ if __name__ == "__main__":
     #
     start = time.time()
     
-    ticker=1934
-    url = f'https://www.google.com/finance/quote/{ticker}:TYO'
-    res = requests.get(url)
-    res.encoding = res.apparent_encoding
-    # res.encoding = 'shift-jis'
-    # res.encoding = 'utf-8'
-    soup = BeautifulSoup(res.content, "lxml")
-    tag = soup.find("div", class_="YMlKec fxKbKc")
-    if tag != None:
-        strvalue = tag.string
-        strvalue = strvalue.rstrip('00')
-        strvalue = re.sub(r"\D", "", strvalue)
-        print(f'ticker:{ticker} - {strvalue}')
+    # ticker=1934
+    # url = f'https://www.google.com/finance/quote/{ticker}:TYO'
+    # res = requests.get(url)
+    # res.encoding = res.apparent_encoding
+    # # res.encoding = 'shift-jis'
+    # # res.encoding = 'utf-8'
+    # soup = BeautifulSoup(res.content, "lxml")
+    # tag = soup.find("div", class_="YMlKec fxKbKc")
+    # if tag != None:
+    #     strvalue = tag.string
+    #     strvalue = strvalue.rstrip('00')
+    #     strvalue = re.sub(r"\D", "", strvalue)
+    #     print(f'ticker:{ticker} - {strvalue}')
         
-    else:
-        print(f'ticker:{ticker}')
+    # else:
+    #     print(f'ticker:{ticker}')
     
     
-    # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    # for ticker, row in tickers_file.iterrows():
-    #     url = f'https://www.google.com/finance/quote/{ticker}:TYO'
-    #     res = requests.get(url)
-    #     # soup = BeautifulSoup(res.content, "html.parser")
-    #     soup = BeautifulSoup(res.content, "lxml")
-    #     tag = soup.find("div", class_="YMlKec fxKbKc")
-    #     if tag != None:
-    #         print(f'ticker:{ticker} - {tag.string}')
-    #     else:
-    #         print(f'ticker:{ticker}')
+    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    for ticker, row in tickers_file.iterrows():
+        url = f'https://www.google.com/finance/quote/{ticker}:TYO'
+        res = requests.get(url)
+        res.encoding = res.apparent_encoding
         
-
-
-
-    #     # for tag in soup.find_all("div", class_="YMlKec fxKbKc"):
-    #     #     print(f'ticker:{ticker} - {tag.string}')
-    #     #     break
+        # soup = BeautifulSoup(res.content, "html.parser")
+        # soup = BeautifulSoup(res.content, "lxml")
+        # tag = soup.find("div", class_="YMlKec fxKbKc")
+        html = lxml.html.fromstring(res.content)
+        tag = html.xpath("//div[@class='YMlKec fxKbKc']")
+        
+        if len(tag) != 0:
+            strvalue = tag[0].text
+            strvalue = strvalue[:-3]
+            strvalue = re.sub(r"\D", "", strvalue)
+            print(f'ticker:{ticker} - {tag[0].text} - {strvalue}')
+        # if tag != None:
+        #     strvalue = tag.string
+        #     strvalue = strvalue[:-3]
+        #     strvalue = re.sub(r"\D", "", strvalue)
+        #     print(f'ticker:{ticker} - {tag.string} - {strvalue}')
+        else:
+            print(f'ticker:{ticker} --------------------------')
         
     print(time.time() - start)
     
-    # print(kabutan.sharedunderstanding)
-    # print(kabutan.tradingvalue)
-    # print(kabutan.tick)
-    # print(kabutan.vwap)
-    # print(kabutan.open)
-    # print(kabutan.high)
-    # print(kabutan.low)
-    # print(kabutan.close)
-    CURRENT_VALUE_XPATH:str = "//*[@id='yDmH0d']/c-wiz/div/div[4]/div/div/main/div[2]/div[1]/div[1]/c-wiz/div/div[1]/div/div[1]/div/div[1]/div/span/div/div"
-    PREVIOUS_VALUE_XPATH:str = "//*[@id='yDmH0d']/c-wiz/div/div[4]/div/div/main/div[2]/div[2]/div/div[1]/div[2]/div"
-
 
     # print(res.content)
     # print(res.text)

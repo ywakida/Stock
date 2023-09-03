@@ -103,20 +103,12 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
         figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
     if row==3:
         figure.update_layout(xaxis3_rangeslider=dict(visible=False))
+        
     return figure
 
 
 def add_volume(figure, chart, row=1, col=1):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     # y軸名を定義
     figure.update_yaxes(title_text="出来高", row=row, col=col)
@@ -130,15 +122,6 @@ def add_volume(figure, chart, row=1, col=1):
 
 def add_rci(figure, chart, row=1, col=1):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """   
     # y軸名を定義
     figure.update_yaxes(title_text="rci", row=row, col=col)
@@ -147,17 +130,8 @@ def add_rci(figure, chart, row=1, col=1):
     
     return figure
       
-def add_heikinashi(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
+def add_heikinashi_candlestick(figure, chart, row=1, col=1):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """   
     # y軸名を定義
     figure.update_yaxes(title_text="平均足", row=row, col=col)
@@ -166,40 +140,9 @@ def add_heikinashi(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL
     # ろうそく足
     figure.add_trace(go.Candlestick(x=chart.index, open=chart['HA_Open'], high=chart['HA_High'], low=chart['HA_Low'], close=chart['HA_Close'], name='Heikinashi', increasing_line_width=1, increasing_line_color='red', increasing_fillcolor='red', decreasing_line_width=1, decreasing_line_color='green', decreasing_fillcolor='green'), row=row, col=col )
     
-    # key = 'S'
-    # if keys.get(key) != None:
-    #     value = keys.get(key)
-    #     figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='yellow', width=1)), row=row, col=col)
-
-    # key = 'M'
-    # if keys.get(key) != None:
-    #     value = keys.get(key)
-    #     figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='red', width=1)), row=row, col=col)
- 
-    #     # ボリンジャーバンド
-    #     # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P2'], name=f'{value} BB + 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-    #     # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}P1'], name=f'{value} BB + 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-    #     # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M1'], name=f'{value} BB - 1', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-    #     # figure.add_trace(go.Scatter(x=chart.index, y=chart[f'BB{value}M2'], name=f'{value} BB - 2', mode="lines", line=dict(dash='dot', color='pink', width=1)), row=row, col=col)
-           
-    # key = 'L'
-    # if keys.get(key) != None:
-    #     value = keys.get(key)
-    #     figure.add_trace(go.Scatter(x=chart.index, y=chart[f'EMA{value}'], name=f'{value} EMA', mode="lines", line=dict(color='lime', width=1)), row=row, col=col)
-    
-    # key = 'LL'
-    # if keys.get(key) != None:
-    #     value = keys.get(key)
-    #     figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
-  
-    # # スイングハイ・スイングロー
-    # # figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"]>0].index, y=chart[chart["SwingHigh"]>0]["High"]*1.0001, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=row, col=col)
-    # # figure.add_trace(go.Scatter(x=chart[chart["SwingLow"]>0].index, y=chart[chart["SwingLow"]>0]["Low"]*0.9999, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=row, col=col)
-    
     # スケーリング機能
     if row==1:
         figure.update_layout(xaxis1_rangeslider=dict(visible=False))
-    
     if row==2:
         figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
     
@@ -208,38 +151,18 @@ def add_heikinashi(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL
 
 def add_heikinashi_bar(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """
     # y軸名を定義
     figure.update_yaxes(title_text="平均足(Bar)", row=row, col=col)
     
-    # 15分足の平均足の色
+    # バー
     figure.add_trace(go.Bar(x=chart[chart['HA_3V']>0].index, y=chart[chart['HA_3V']>0]['HA_3V'], name='平均足陽線', marker=dict(color='red')), row=row, col=col)
     figure.add_trace(go.Bar(x=chart[chart['HA_3V']<0].index, y=chart[chart['HA_3V']<0]['HA_3V']*-1, name='平均足陰線', marker=dict(color='lime')), row=row, col=col)
-    # figure.add_trace(go.Bar(x=chart[chart['HA_3V']>0].index, y=chart[chart['HA_3V']>0]['HA_3V'], name='平均足陽線', marker=dict(color='red')), row=row, col=col)
-    # figure.add_trace(go.Bar(x=chart[chart['HA_3V']<0].index, y=chart[chart['HA_3V']<0]['HA_3V'], name='平均足陰線', marker=dict(color='lime')), row=row, col=col)
       
     return figure
 
 def add_heikinashi2(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":200}):
     """平均足のプロット情報作成
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
     """   
     # y軸名を定義
     figure.update_yaxes(title_text="平均足", row=row, col=col)
@@ -250,8 +173,7 @@ def add_heikinashi2(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
     
     # スケーリング機能
     if row==1:
-        figure.update_layout(xaxis1_rangeslider=dict(visible=False))
-    
+        figure.update_layout(xaxis1_rangeslider=dict(visible=False))    
     if row==2:
         figure.update_layout(xaxis2_rangeslider=dict(visible=False))    
     
@@ -396,7 +318,7 @@ def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":2
     # X軸から土日を除外する
     fig = remove_weekend(fig, chart)
     
-    fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=False, show_order=True)
+    fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=True, show_order=True)
     fig = add_rci(fig, chart, 2, 1)
     
     # プロット
@@ -933,11 +855,18 @@ def add_simulation(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL
         if f'SMA{value}' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'SMA{value}'], name=f'{value} SMA', mode="lines", line=dict(color='cyan', width=1)), row=row, col=col)
   
+    # スイングハイ・スイングロー
+    # if 'SwingHigh' in chart.columns:
+    #     figure.add_trace(go.Scatter(x=chart[chart["SwingHigh"]>0].index, y=chart[chart["SwingHigh"]>0]["High"]*1.01, name="高値", mode="markers", marker_symbol="triangle-down", marker_size=5, marker_color="white"), row=1, col=1)
+    # if 'SwingLow' in chart.columns:
+    #     figure.add_trace(go.Scatter(x=chart[chart["SwingLow"]>0].index, y=chart[chart["SwingLow"]>0]["Low"]*0.99, name="低値", mode="markers", marker_symbol="triangle-up", marker_size=5, marker_color="white"), row=1, col=1)
+
+
     # Buy or Sell
     if 'Buy' in chart.columns:
-        figure.add_trace(go.Scatter(x=chart[chart["Buy"]==True].index, y=chart[chart["Buy"]==True]["Low"]-10, name="買い", mode="markers", marker_symbol="arrow-up", marker_size=5, marker_color="white"), row=row, col=col)
+        figure.add_trace(go.Scatter(x=chart[chart["Buy"]==True].index, y=chart[chart["Buy"]==True]["Low"]*0.99, name="買い", mode="markers", marker_symbol="arrow-right", marker_size=8, marker_color="white"), row=row, col=col)
     if 'Sell' in chart.columns:
-        figure.add_trace(go.Scatter(x=chart[chart["Sell"]==True].index, y=chart[chart["Sell"]==True]["High"]+10, name="売り", mode="markers", marker_symbol="arrow-down", marker_size=5, marker_color="white"), row=row, col=col)
+        figure.add_trace(go.Scatter(x=chart[chart["Sell"]==True].index, y=chart[chart["Sell"]==True]["High"]*1.01, name="売り", mode="markers", marker_symbol="arrow-left", marker_size=8, marker_color="white"), row=row, col=col)
 
     # スケーリング機能
     if row==1:
@@ -950,13 +879,24 @@ def add_simulation(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL
 
 def plot_simulationchart(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
     """ろうそく足のプロット
+    """
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
 
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        auto_open (bool, optional): _description_. Defaults to False.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
+    # グラフの設定
+    fig = add_graphsetting(fig)
+    
+    # X軸から土日を除外する
+    fig = remove_weekend(fig, chart)
+    
+    fig = add_simulation(fig, chart, 1, 1, keys)
+    fig = add_rci(fig, chart, 2, 1)
+    # fig = add_volume(fig, chart, 3, 1)
+    
+    # プロット
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+    
+def plot_simulationchart2(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
+    """ろうそく足のプロット
     """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
 
@@ -972,7 +912,7 @@ def plot_simulationchart(filename, currency, chart, auto_open=False, keys={"S":5
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
     
-
+    
 if __name__ == "__main__":
     import indicator    
     os.system('cls')

@@ -205,9 +205,20 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2023, 7, 28).date()
-    print(date2)
+    # date2 = datetime.datetime(2023, 7, 28).date()
+    # print(date2)
     # test(date2)
-    create_tickers(datetime.datetime.today().date(),True)
+    # create_tickers(datetime.datetime.today().date(),True)
     # create_tickers(date2,True)
-    change_view()
+    # change_view()
+    
+    ticker = 4824
+    start = time.time()
+    chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+    print('100 ', time.time() - start)
+    start = time.time()
+    chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
+    file_name = f'{chart_folder}/{ticker}.csv'               
+    chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    print('1 ', time.time() - start)
+    
