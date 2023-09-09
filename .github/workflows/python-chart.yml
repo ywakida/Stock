@@ -41,14 +41,10 @@ jobs:
         python -m pip install yfinance pandas_datareader xlrd
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
                 
-    - name: chart days update
+    - name: ohlc update
       run: |
-        python -B chart_days.py
+        python -B -c "import chart_days; chart_days.task()"
         
-    - name: chart minutes update
-      run: |
-        python -B chart_minutes.py
-
     - name: git update
       run: |
         #git add *.csv
