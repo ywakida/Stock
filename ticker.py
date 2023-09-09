@@ -1,14 +1,17 @@
+"""
+株価の銘柄リストを更新する
+"""
 import pandas
 import datetime
-import os
-import yfinance
 from kabutan import Kabutan
-     
+
+list_filename = 'tickers_list.csv'
+
 def update_list():
     """
     銘柄リストを更新する
     """
-    output_filename = 'tickers_list.csv'
+    output_filename = list_filename
     
     url = 'https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls'
     tickers_list = pandas.read_excel(url, index_col=1)

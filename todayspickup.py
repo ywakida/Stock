@@ -6,8 +6,9 @@ import time
 import numpy
 import indicator
 from zoneinfo import ZoneInfo
+import chart_days
 
-chart_folder = 'yfinance_csv'
+chart_folder = chart_days.ohlc_1day_all_folder
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 

@@ -7,6 +7,9 @@ import yfinance
 # gdrivepath = '/content/drive/My Drive/stock/'
 basepath = './'
 encode = 'utf-8'
+ohlc_1day_all_folder = 'yfinance_csv'
+ohlc_1minute_folder = 'ohlc_1minute'
+ohlc_5minute_folder = 'ohlc_5minute'
  
 def create_daily_chart_csv(folder_path, ticker):
     """ 日足チャートのCSVの作成
@@ -58,6 +61,54 @@ def create_daily_chart_csv(folder_path, ticker):
         #   daily_chart.to_csv(file_name, header=True) # 保存
             print(f'{file_name} is incorrect.')
                 
+def update_ohlc_1day():
+    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+
+    os.makedirs(ohlc_1day_all_folder, exist_ok=True) 
+    
+    for ticker, row in tickers_file.iterrows():
+        
+        create_daily_chart_csv(ohlc_1day_all_folder, ticker)
+
+
+def task():
+
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        
+        folder = f'{basepath}{ohlc_1minute_folder}'
+        os.makedirs(folder, exist_ok=True)
+        chart_savename = f'{folder}/{ticker}.csv'          
+        chart1m = pandas.DataFrame()
+        try:
+            chart1m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='1m', progress=False)
+        except Exception:
+            pass 
+        
+        if not chart1m.empty:
+            if len(chart1m)>1:
+                chart1m.to_csv(chart_savename)
+
+        folder = f'{basepath}{ohlc_5minute_folder}'
+        os.makedirs(folder, exist_ok=True) 
+        chart_savename = f'{folder}/{ticker}.csv'
+        chart5m = pandas.DataFrame()        
+        try:
+            chart5m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='5m', progress=False)
+        except Exception:
+            pass
+        
+        if not chart5m.empty:
+          if len(chart5m)>1:
+            chart5m.to_csv(chart_savename)
+          
+
+    print('end:', datetime.datetime.now())
+    
+            
     
 # https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls
     
@@ -70,12 +121,14 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    update_ohlc_1day()
+    # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
-    for ticker, row in tickers_file.iterrows():
-        folder = 'yfinance_csv'
-        os.makedirs(folder, exist_ok=True) 
-        create_daily_chart_csv(folder, ticker)
+    # os.makedirs(ohlc_all_folder, exist_ok=True) 
+    
+    # for ticker, row in tickers_file.iterrows():
+        
+    #     create_daily_chart_csv(ohlc_all_folder, ticker)
 
 
  

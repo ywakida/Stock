@@ -407,7 +407,7 @@ def plot_with_heikinashi_candlestick(filename, title, chart, auto_open=False, ke
     fig = remove_weekend(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
-    fig = add_heikinashi(fig, chart, 1, 1)
+    fig = add_heikinashi_candlestick(fig, chart, 1, 1)
     fig = add_rci(fig, chart, row=2, col=1)
     
     # プロット
@@ -911,6 +911,9 @@ def plot_simulationchart2(filename, currency, chart, auto_open=False, keys={"S":
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+    
+    print('test')
+    plotly.offline.plot(fig, image='png', image_filename='test.png', output_type='file', image_width=1000, image_height=600, auto_open=False)
     
     
 if __name__ == "__main__":
