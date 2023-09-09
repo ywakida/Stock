@@ -106,25 +106,31 @@ def save_online_ohlc(ticker, interval, folder):
     # print(ohlc.tail(100))
     print(f"{save_filename} is updated")
 
-def task():
+def task(debug=False):
 
     # 銘柄一覧の読み出し
     csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+    
+    if debug:
+        tickers_file = tickers_file.head(100)
+    
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
         # print(ticker)
         
-        # ite1 = time.time()
+        ite1 = time.time()
         create_daily_chart_csv(ticker)
-        # ite2 = time.time()
+        ite2 = time.time()
         folder = f'{basepath}{per1minute_folder}'
         save_online_ohlc(ticker, '1m', folder)
-        # ite3 = time.time()
+        ite3 = time.time()
         folder = f'{basepath}{per5minutes_folder}'
         save_online_ohlc(ticker, '5m', folder)          
         ite4 = time.time()
-        # print("total: ", round(ite4-ite1, 3), " ", round(ite2-ite1, 3), ", ", round(ite3-ite2, 3), ", ", round(ite4-ite3, 3))
+        
+        if debug:
+            print("total: ", round(ite4-ite1, 3), " ", round(ite2-ite1, 3), ", ", round(ite3-ite2, 3), ", ", round(ite4-ite3, 3))
 
     print('end:', datetime.datetime.now())
     
