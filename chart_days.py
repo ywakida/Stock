@@ -2,6 +2,7 @@ import pandas
 import datetime
 import os
 import yfinance
+import time
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
@@ -54,7 +55,7 @@ def create_daily_chart_csv(ticker):
             update_chart = pandas.DataFrame()        
             try:
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
-                update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'max', interval='1d', progress=False)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'7d', progress=False)
             except Exception:
                 pass
             
@@ -90,13 +91,11 @@ def update_ohlc_1day():
 
 def save_online_ohlc(ticker, interval, folder):
     """ OHLCデータをオンラインから入手する
-    """
-    folder = f'{basepath}{per1minute_folder}'
-    
+    """    
     save_filename = f'{folder}/{ticker}.csv'          
     ohlc = pandas.DataFrame()
     try:
-        ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period='5d', progress=False)
+        ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period='7d', progress=False)
     except Exception:
         pass 
 
@@ -104,6 +103,7 @@ def save_online_ohlc(ticker, interval, folder):
         if len(ohlc)>1:
             ohlc.to_csv(save_filename)
 
+    # print(ohlc.tail(100))
     print(f"{save_filename} is updated")
 
 def task():
@@ -115,13 +115,16 @@ def task():
     for ticker, row in tickers_file.iterrows():
         print(ticker)
         
+        ite1 = time.time()
         create_daily_chart_csv(ticker)
-        
+        ite2 = time.time()
         folder = f'{basepath}{per1minute_folder}'
         save_online_ohlc(ticker, '1m', folder)
-
+        ite3 = time.time()
         folder = f'{basepath}{per5minutes_folder}'
         save_online_ohlc(ticker, '5m', folder)          
+        ite4 = time.time()
+        print(ite2-ite1, ", ", ite3-ite2, ", ", ite4-ite3)
 
     print('end:', datetime.datetime.now())
     
@@ -135,8 +138,10 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    update_ohlc_1day()
-    # task()
+    # folder = f'{basepath}{per1minute_folder}'
+    # save_online_ohlc(1301, '1m', folder)
+    # update_ohlc_1day()
+    task()
     # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
     # os.makedirs(ohlc_all_folder, exist_ok=True) 
