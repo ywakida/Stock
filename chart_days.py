@@ -7,9 +7,9 @@ import yfinance
 # gdrivepath = '/content/drive/My Drive/stock/'
 basepath = './'
 encode = 'utf-8'
-ohlc_1day_all_folder = 'yfinance_csv'
-ohlc_1minute_folder = 'ohlc_1minute'
-ohlc_5minute_folder = 'ohlc_5minute'
+daily_all_folder = 'ohlc_daily_all'
+per1minute_folder = 'ohlc_1minute'
+per5minutes_folder = 'ohlc_5minutes'
  
 def create_daily_chart_csv(folder_path, ticker):
     """ 日足チャートのCSVの作成
@@ -64,11 +64,11 @@ def create_daily_chart_csv(folder_path, ticker):
 def update_ohlc_1day():
     tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
-    os.makedirs(ohlc_1day_all_folder, exist_ok=True) 
+    os.makedirs(daily_all_folder, exist_ok=True) 
     
     for ticker, row in tickers_file.iterrows():
         
-        create_daily_chart_csv(ohlc_1day_all_folder, ticker)
+        create_daily_chart_csv(daily_all_folder, ticker)
 
 
 def task():
@@ -79,7 +79,7 @@ def task():
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
         
-        folder = f'{basepath}{ohlc_1minute_folder}'
+        folder = f'{basepath}{per1minute_folder}'
         os.makedirs(folder, exist_ok=True)
         chart_savename = f'{folder}/{ticker}.csv'          
         chart1m = pandas.DataFrame()
@@ -92,7 +92,7 @@ def task():
             if len(chart1m)>1:
                 chart1m.to_csv(chart_savename)
 
-        folder = f'{basepath}{ohlc_5minute_folder}'
+        folder = f'{basepath}{per5minutes_folder}'
         os.makedirs(folder, exist_ok=True) 
         chart_savename = f'{folder}/{ticker}.csv'
         chart5m = pandas.DataFrame()        

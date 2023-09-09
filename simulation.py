@@ -1,18 +1,18 @@
 import pandas
 import datetime
 import os
-import yfinance
 import time
 import numpy
 import indicator
 import chart_plot
+import chart_days
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
 basepath = './'
 encode = 'utf-8'
 
-chart_folder = 'yfinance_csv'
+chart_folder = chart_days.daily_all_folder
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 
