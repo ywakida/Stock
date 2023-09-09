@@ -43,7 +43,7 @@ jobs:
                 
     - name: ohlc update
       run: |
-        python -B -c "import chart_days; chart_days.task()"
+        python -B -c "import chart_days; chart_days.task(True)"
         
     - name: git update
       run: |
