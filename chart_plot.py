@@ -68,7 +68,7 @@ def remove_weekend(figure, chart):
     return figure
     
     
-def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":100}, show_swing=True, show_bollinger=True, show_order=False):
+def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "LL":200}, show_swing=True, show_bollinger=True, show_order=False):
     """ろうそく足のプロット情報作成
     """
     # y軸名を定義
@@ -211,17 +211,7 @@ def add_heikinashi2(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
 
 
 def add_deviationrate(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200}):
-    """乖離率の追加
-
-    Args:
-        figure (_type_): _description_
-        chart (_type_): _description_
-        row (int, optional): _description_. Defaults to 1.
-        col (int, optional): _description_. Defaults to 1.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
-    Returns:
-        _type_: _description_
+    """ 乖離率の追加
     """
     figure.update_yaxes(title_text="乖離率", row=row, col=col)
     
@@ -358,14 +348,6 @@ def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":2
 
 def plot_with_dr(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
     """乖離率とのプロット
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        auto_open (bool, optional): _description_. Defaults to False.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
-
     """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
     
@@ -604,7 +586,7 @@ if __name__ == "__main__":
     tickers_list = tickers_list.head(100)
     for ticker, row in tickers_list.iterrows():
         print (f'{ticker}:')
-        param = [5, 25, 75]
+        param = [5, 25, 75, 200]
         ohlc =  pandas.read_csv(f'{ohlcfolder}/{ticker}.csv', index_col=0, parse_dates=True)
         ohlc = indicator.add_basic(ohlc, param)
         ohlc = indicator.add_sma_dr(ohlc, param)
@@ -614,5 +596,10 @@ if __name__ == "__main__":
         ohlc = ohlc.tail(500)
         heikinashi = heikinashi.tail(500)
         # plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
-        plot_with_heikinashi_candlestick2(f'{htmlfolder}/{ticker}.html', ticker, ohlc, heikinashi)
+        plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
         
+        
+        
+    #      S  M  L  LL
+    # day  5  25 75 200 
+    # week 5  25 75 200

@@ -30,7 +30,7 @@ def create_daily_chart_csv(ticker):
     if not os.path.exists(daily_all_filename):
         
         # ダウンロードし、空データでなく、ヘッダのみでもない場合、保存する
-        new_chart = yfinance.download(tickers=f'{ticker}.T', period='max', progress=False)
+        new_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period='max', progress=False)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない                
                 new_chart.to_csv(daily_all_filename, header=True) # 保存
@@ -113,18 +113,18 @@ def task():
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
-        print(ticker)
+        # print(ticker)
         
-        ite1 = time.time()
+        # ite1 = time.time()
         create_daily_chart_csv(ticker)
-        ite2 = time.time()
+        # ite2 = time.time()
         folder = f'{basepath}{per1minute_folder}'
         save_online_ohlc(ticker, '1m', folder)
-        ite3 = time.time()
+        # ite3 = time.time()
         folder = f'{basepath}{per5minutes_folder}'
         save_online_ohlc(ticker, '5m', folder)          
         ite4 = time.time()
-        print(ite2-ite1, ", ", ite3-ite2, ", ", ite4-ite3)
+        # print("total: ", round(ite4-ite1, 3), " ", round(ite2-ite1, 3), ", ", round(ite3-ite2, 3), ", ", round(ite4-ite3, 3))
 
     print('end:', datetime.datetime.now())
     
@@ -138,18 +138,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    # folder = f'{basepath}{per1minute_folder}'
-    # save_online_ohlc(1301, '1m', folder)
-    # update_ohlc_1day()
     task()
-    # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-
-    # os.makedirs(ohlc_all_folder, exist_ok=True) 
-    
-    # for ticker, row in tickers_file.iterrows():
-        
-    #     create_daily_chart_csv(ohlc_all_folder, ticker)
-
-
  
             
