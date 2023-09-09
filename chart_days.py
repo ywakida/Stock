@@ -10,26 +10,35 @@ encode = 'utf-8'
 daily_all_folder = 'ohlc_daily_all'
 per1minute_folder = 'ohlc_1minute'
 per5minutes_folder = 'ohlc_5minutes'
+daily_100_folder = 'ohlc_daily_100days'
  
-def create_daily_chart_csv(folder_path, ticker):
+# フォルダの作成
+os.makedirs(daily_all_folder, exist_ok=True)
+os.makedirs(per1minute_folder, exist_ok=True)
+os.makedirs(per5minutes_folder, exist_ok=True)
+os.makedirs(daily_100_folder, exist_ok=True)
+
+
+def create_daily_chart_csv(ticker):
     """ 日足チャートのCSVの作成
     """  
-    file_name = f'{folder_path}/{ticker}.csv'
+    daily_all_filename = f'{basepath}{daily_all_folder}/{ticker}.csv'
+    daily_100_filename = f'{basepath}{daily_100_folder}/{ticker}.csv'
     
     # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
-    if not os.path.exists(file_name):
+    if not os.path.exists(daily_all_filename):
         
         # ダウンロードし、空データでなく、ヘッダのみでもない場合、保存する
         new_chart = yfinance.download(tickers=f'{ticker}.T', period='max', progress=False)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない                
-                new_chart.to_csv(file_name, header=True) # 保存
-                print(f'{file_name} is created.')
+                new_chart.to_csv(daily_all_filename, header=True) # 保存
+                print(f'{daily_all_filename} is created.')
                 
     # ファイルが存在する場合は、既存のファイルに新しいデータを追加更新する
     else:
         # csvファイルを読み取り、最新日付を取得する
-        daily_chart =  pandas.read_csv(file_name, index_col=0, parse_dates=True)
+        daily_chart =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
 
         # ファイルにデータがある場合は、ファイル内の最新日付から本日までのデータを追加更新を実施する
         if len(daily_chart) > 1:
@@ -44,7 +53,8 @@ def create_daily_chart_csv(folder_path, ticker):
           
             update_chart = pandas.DataFrame()        
             try:
-                update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
+                # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'max', interval='1d', progress=False)
             except Exception:
                 pass
             
@@ -52,24 +62,49 @@ def create_daily_chart_csv(folder_path, ticker):
             if not update_chart.empty:
                 if len(update_chart) > 1:  
                     daily_chart = pandas.concat([daily_chart, update_chart], sort=True)
-                    daily_chart.drop_duplicates(keep='last', inplace=True) # 重複があれば最新で更新する
-                    daily_chart.to_csv(file_name, header=True) # 保存
-                    print(f"{file_name} is updated {delta_days} days")
+                    # daily_chart.drop_duplicates(keep='last', inplace=True) # 重複があれば最新で更新する
+                    daily_chart = daily_chart[~daily_chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
+                    daily_chart.sort_index(inplace=True)
+                    daily_chart.to_csv(daily_all_filename, header=True) # 保存
+                    daily_chart.tail(100).to_csv(daily_100_filename, header=True) # 保存
+                    
+                    print(f"{daily_all_filename} and {daily_100_filename} is updated")
+                    # print(f"{daily_all_filename} is updated {delta_days} days")
 
         else:
         #   daily_chart = yfinance.download(tickers=f'{ticker}.T', period='max', progress=False)
         #   daily_chart.to_csv(file_name, header=True) # 保存
-            print(f'{file_name} is incorrect.')
+            print(f'{daily_all_filename} is incorrect.')
                 
 def update_ohlc_1day():
+    """ 
+    """
     tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
     os.makedirs(daily_all_folder, exist_ok=True) 
     
     for ticker, row in tickers_file.iterrows():
         
-        create_daily_chart_csv(daily_all_folder, ticker)
+        create_daily_chart_csv(ticker)
 
+
+def save_online_ohlc(ticker, interval, folder):
+    """ OHLCデータをオンラインから入手する
+    """
+    folder = f'{basepath}{per1minute_folder}'
+    
+    save_filename = f'{folder}/{ticker}.csv'          
+    ohlc = pandas.DataFrame()
+    try:
+        ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period='5d', progress=False)
+    except Exception:
+        pass 
+
+    if not ohlc.empty:
+        if len(ohlc)>1:
+            ohlc.to_csv(save_filename)
+
+    print(f"{save_filename} is updated")
 
 def task():
 
@@ -78,40 +113,19 @@ def task():
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
+        print(ticker)
+        
+        create_daily_chart_csv(ticker)
         
         folder = f'{basepath}{per1minute_folder}'
-        os.makedirs(folder, exist_ok=True)
-        chart_savename = f'{folder}/{ticker}.csv'          
-        chart1m = pandas.DataFrame()
-        try:
-            chart1m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='1m', progress=False)
-        except Exception:
-            pass 
-        
-        if not chart1m.empty:
-            if len(chart1m)>1:
-                chart1m.to_csv(chart_savename)
+        save_online_ohlc(ticker, '1m', folder)
 
         folder = f'{basepath}{per5minutes_folder}'
-        os.makedirs(folder, exist_ok=True) 
-        chart_savename = f'{folder}/{ticker}.csv'
-        chart5m = pandas.DataFrame()        
-        try:
-            chart5m = yfinance.download(tickers=f'{ticker}.T', period='5d', interval='5m', progress=False)
-        except Exception:
-            pass
-        
-        if not chart5m.empty:
-          if len(chart5m)>1:
-            chart5m.to_csv(chart_savename)
-          
+        save_online_ohlc(ticker, '5m', folder)          
 
     print('end:', datetime.datetime.now())
     
-            
-    
-# https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls
-    
+
 if __name__ == "__main__":
     
     os.system('cls')
@@ -122,6 +136,7 @@ if __name__ == "__main__":
     pandas.set_option('display.width', 1000)
     
     update_ohlc_1day()
+    # task()
     # tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
 
     # os.makedirs(ohlc_all_folder, exist_ok=True) 
