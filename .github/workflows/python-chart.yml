@@ -47,7 +47,7 @@ jobs:
         
     - name: chart minutes update
       run: |
-        python -B chart_minutes.py
+        python -B -c "import chart_days; chart_days.task()"
 
     - name: git update
       run: |
