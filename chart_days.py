@@ -138,7 +138,7 @@ def task(debug=False):
             time_1minute += ite3 - ite2
             time_5minutes += ite4 - ite3
 
-        print(round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
+    print(round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
 
     print('end:', datetime.datetime.now())
     
