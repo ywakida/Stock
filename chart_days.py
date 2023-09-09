@@ -112,6 +112,10 @@ def task(debug=False):
     csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
     
+    time_daily = 0
+    time_1minute = 0
+    time_5minutes = 0
+    
     if debug:
         tickers_file = tickers_file.head(100)
     
@@ -130,7 +134,11 @@ def task(debug=False):
         ite4 = time.time()
         
         if debug:
-            print("total: ", round(ite4-ite1, 3), " ", round(ite2-ite1, 3), ", ", round(ite3-ite2, 3), ", ", round(ite4-ite3, 3))
+            time_daily += ite2-ite1
+            time_1minute += ite3 - ite2
+            time_5minutes += ite4 - ite3
+
+        print(round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
 
     print('end:', datetime.datetime.now())
     
