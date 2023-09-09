@@ -55,8 +55,8 @@ def create_daily_chart_csv(ticker):
             update_chart = pandas.DataFrame()        
             try:
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
-                # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'7d', progress=False)
-                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'7d', progress=False)
+                # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
             except Exception:
                 pass
             
