@@ -14,7 +14,7 @@ on:
   
   schedule:
   # every saturday 3:00(UTC) = 12:00(JST)
-  #- cron:  '0 3 * * 6'
+  - cron:  '0 3 * * 6'
 jobs:
   csv_update:
 
