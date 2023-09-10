@@ -44,8 +44,7 @@ jobs:
     - name: ticker update
       run: |
         # update ticker list
-        python ticker.py
-        python -B -c "import ticker; ticker.update_list()"
+        python gfinance.py
 
     - name: git update
       run: |
