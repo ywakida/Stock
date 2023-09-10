@@ -35,7 +35,7 @@ def remove_gap_datetime(figure, chart):
     minutes = (chart.index[1]-chart.index[0]).seconds / 60
     days = (chart.index[1]-chart.index[0]).days
     
-    if days==1:
+    if days>=1:
         d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq='B') # 月から金のデータ期間の完全な時系列を取得する
     else:
         d_all = pandas.date_range(start=chart.index[0],end=chart.index[-1], freq=f'{minutes}T') # データ期間の完全な時系列を取得する
@@ -297,7 +297,7 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
     key = 'LL'
     if keys.get(key) != None:
         value = keys.get(key)
-        if f'Slbbbbbbbbbbope{value}' in chart.columns:
+        if f'Slope{value}' in chart.columns:
             figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Slope{value}'], name=f'{value} Slope', mode="lines", line=dict(color='cyan', width=2)), row=row, col=col)
       
     return figure
@@ -305,23 +305,18 @@ def add_slope(figure, chart, row=1, col=1, keys={"S":5, "M":20, "L":60, "LL":200
 
 def plot_basicchart(filename, currency, chart, auto_open=False, keys={"S":5, "M":25, "L":75, "LL":200}):
     """ろうそく足のプロット
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        auto_open (bool, optional): _description_. Defaults to False.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
     """
-    fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[1.0], x_title="Date")
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.8, 0.2], x_title="Date")
 
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
+    # X軸から空白期間を除外する
+    # fig = remove_gap_datetime(fig, chart)
     fig = remove_weekend(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=False, show_order=True)
+    fig = add_volume(fig, chart, 2, 1) 
     
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
@@ -335,8 +330,8 @@ def plot_with_rci(filename, currency, chart, auto_open=False, keys={"S":5, "M":2
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1, keys, show_swing=True, show_order=True)
     fig = add_rci(fig, chart, 2, 1)
@@ -354,8 +349,8 @@ def plot_with_dr(filename, currency, chart, auto_open=False, keys={"S":5, "M":25
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1, keys)
     fig = add_deviationrate(fig, chart, 2, 1, keys)
@@ -367,21 +362,14 @@ def plot_with_dr(filename, currency, chart, auto_open=False, keys={"S":5, "M":25
     
 def plot_with_sigma(filename, currency, chart, auto_open=False, keys={"S":5, "M":20, "L":60, "LL":200}):
     """シグマとのプロット
-
-    Args:
-        filename (_type_): _description_
-        currency (_type_): _description_
-        chart (_type_): _description_
-        auto_open (bool, optional): _description_. Defaults to False.
-        keys (dict, optional): _description_. Defaults to {"S":5, "M":20, "L":60, "LL":200}.
     """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01, row_heights=[0.7, 0.3], x_title="Date")
     
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1, keys)
     fig = add_sigma(fig, chart, 2, 1, keys)
@@ -397,8 +385,8 @@ def plot_with_slope(filename, title, chart, auto_open=False, keys={"S":5, "M":20
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_slope(fig, chart, 2, 1)
@@ -415,8 +403,8 @@ def plot_with_heikinashi_candlestick(filename, title, chart, auto_open=False, ke
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_heikinashi_candlestick(fig, chart, 1, 1)
@@ -433,8 +421,8 @@ def plot_with_heikinashi_bar(filename, title, chart, auto_open=False, keys={"S":
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, chart)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_heikinashi_bar(fig, chart, 2, 1)
@@ -451,9 +439,9 @@ def plot_with_heikinashi_candlestick2(filename, title, ohlc, heikinashi, auto_op
     # グラフの設定
     fig = add_graphsetting(fig)
     
-    # X軸から土日を除外する
-    fig = remove_weekend(fig, ohlc)
-    fig = remove_weekend(fig, heikinashi)
+    # X軸から空白期間を除外する
+    fig = remove_gap_datetime(fig, ohlc)
+    fig = remove_gap_datetime(fig, heikinashi)
     
     fig = add_candlestick(fig, ohlc, 1, 1)
     fig = add_heikinashi2(fig, heikinashi, 2, 1)
@@ -581,25 +569,32 @@ if __name__ == "__main__":
     
     htmlfolder = 'html'
     os.makedirs(htmlfolder, exist_ok=True) 
-    ohlcfolder = chart_days.daily_all_folder
+    ohlcfolder = chart_days.per5minutes_folder
     
-    tickers_list = tickers_list.head(100)
+    # tickers_list = tickers_list.head(20)
     for ticker, row in tickers_list.iterrows():
         print (f'{ticker}:')
         param = [5, 25, 75, 200]
         ohlc =  pandas.read_csv(f'{ohlcfolder}/{ticker}.csv', index_col=0, parse_dates=True)
+        
+        # if ohlcfolder == chart_days.per1minute_folder:
+        #     rule = '5T'
+        #     d_ohlcv = {'Open':'first', 'High':'max', 'Low':'min', 'Close':'last', 'Volume':sum}
+        #     ohlc = ohlc.resample(rule).agg(d_ohlcv)
+        #     ohlc = ohlc.dropna()
+                    
         ohlc = indicator.add_basic(ohlc, param)
         ohlc = indicator.add_sma_dr(ohlc, param)
         ohlc = indicator.add_swing_high_low(ohlc)
-        heikinashi = indicator.create_heikinashi(ohlc)
+        # heikinashi = indicator.create_heikinashi(ohlc)
         
-        ohlc = ohlc.tail(500)
-        heikinashi = heikinashi.tail(500)
+        ohlc = ohlc.tail(1000)
+        # heikinashi = heikinashi.tail(500)
         # plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
-        plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
+        plot_basicchart(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
         
         
         
-    #      S  M  L  LL
-    # day  5  25 75 200 
-    # week 5  25 75 200
+    #       S   M   L   LL
+    # day   5   25  75  200 
+    # week  25  75  375

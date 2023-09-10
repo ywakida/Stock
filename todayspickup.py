@@ -8,7 +8,7 @@ import indicator
 from zoneinfo import ZoneInfo
 import chart_days
 
-chart_folder = chart_days.daily_all_folder
+ohlc_folder = chart_days.daily_100_folder
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 
@@ -16,8 +16,8 @@ def test(date=datetime.datetime.today().date(), debug=False):
     print(date)
     
     chart = pandas.DataFrame()
-    file_name = f'{chart_folder}/9734.csv'     
-    file_name = f'{chart_folder}/6920.csv'
+    file_name = f'{ohlc_folder}/9734.csv'     
+    file_name = f'{ohlc_folder}/6920.csv'
     chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
     print(chart.tail(5))
     
@@ -38,7 +38,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
     # tickers_list = tickers_list.tail(150)
 
     ticker_chart = pandas.DataFrame() 
-    
+    ticker_chart = ticker_chart.head(100)
 
     for ticker, row in tickers_list.iterrows():
            
@@ -47,7 +47,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
             if debug == False:
                 chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
             else:
-                file_name = f'{chart_folder}/{ticker}.csv'   
+                file_name = f'{ohlc_folder}/{ticker}.csv'   
                 print('ticker: ', ticker, ' filename: ', file_name)
                 chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
                 
@@ -217,9 +217,12 @@ if __name__ == "__main__":
     start = time.time()
     chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
     print('100 ', time.time() - start)
+    # print(chart)
     start = time.time()
-    chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
-    file_name = f'{chart_folder}/{ticker}.csv'               
+    file_name = f'{ohlc_folder}/{ticker}.csv'
     chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
+    chart = pandas.concat([chart, today_chart], sort=True)                
+    # chart = chart[~chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
     print('1 ', time.time() - start)
-    
+    print(chart.tail(100))

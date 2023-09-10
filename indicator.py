@@ -1,6 +1,7 @@
 import pandas
 import os
 import numpy
+import chart_days
 
 def add_sma(chart, params=[5, 25, 75]):
     """ 単純移動平均線の追加
@@ -282,13 +283,49 @@ def add_candlestick_pattern(chart):
     chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
     
     chart['Ashi2'] = 'なし'
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<=chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<=chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰つつみ', inplace=True)
+
+    # はらみ線
+    # 高値圏で出現すれば天井
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陽の陽はらみ(高値圏で天井)', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽の陰はらみ(高値圏で天井)', inplace=True)
+    # 安値圏で出現すれば底
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陰の陰はらみ(安値圏で底)', inplace=True)
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰の陽はらみ(安値圏で底)', inplace=True)
     
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽たすき', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰たすき', inplace=True)
+    # つつみ線
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽の陽つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陰の陽つつみ(下落から上昇)', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陽の陰つつみ', inplace=True)
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰の陰つつみ(上昇から下落)', inplace=True)
+
+    # 出会い線
+    deai_diff=1
+    # 上昇基調のなかでは買いのサインです。
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陽振り分け(買い圧強)', inplace=True)
+    # 下落基調の中では売りのサインです。
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陰振り分け(売り圧強)', inplace=True)    
+
+    # 振り分け線
+    furiwake_diff=1
+    # 上昇基調のなかでは買いのサインです。
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陽振り分け(上昇中買い)', inplace=True)
+    # 下落基調の中では売りのサインです。
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陰振り分け(下落中売り)', inplace=True)    
+    
+    # たすき線
+    # 下落基調では売りのサインです。逆のサイント勘違いしやすい
+    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽たすき(下落中売り)', inplace=True)
+    # 上昇基調では買いのサインです。逆のサイント勘違いしやすい
+    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰たすき(上昇中買い)', inplace=True)
+
+
+    # 毛抜き天井・毛抜き底
+    kenuki_diff=1
+    # 2営業日の高値がほぼ同じ水準の場合。陰線・陽線の組み合わせは問いません。高値圏で現れれば天井が意識されているサインです。
+    chart['Ashi2'].mask((chart['High']>=chart['High'].shift()-kenuki_diff) & (chart['High']<=chart['High'].shift()+kenuki_diff), '毛抜き天井(高値圏売り)', inplace=True)
+    # 2営業日の安値がほぼ同じ水準の場合。陰線・陽線の組み合わせは問いません。安値圏で現れればそこが底値として意識されるサインです。
+    chart['Ashi2'].mask((chart['Low']>=chart['Low'].shift()-kenuki_diff) & (chart['Low']<=chart['Low'].shift()+kenuki_diff), '毛抜き底(安値圏買い)', inplace=True)
+
     
     
     # > : 連続陽線で実体がひとつ前より上がっている数
@@ -340,8 +377,9 @@ if __name__ == "__main__":
     
     print(tickers_list)
     
+    folder = chart_days.daily_all_folder
     for ticker, row in tickers_list.iterrows():
-        folder = 'yfinance_csv'
+        
         
         chart_filename = f'{folder}/{ticker}.csv'
         if os.path.exists(chart_filename):
@@ -351,11 +389,11 @@ if __name__ == "__main__":
             chart = pandas.DataFrame()
             chart =  pandas.read_csv(chart_filename, index_col=0, parse_dates=True)
 
-        
-            chart.sort_index(inplace=True)
-            chart = chart[~chart.index.duplicated(keep='last')]
+            # chart = chart[~chart.index.duplicated(keep='last')]        
+            # chart.sort_index(inplace=True)
             # print(chart.tail(100))    
-
+            print(chart[chart['Close'] <2000])
+            
             add_basic(chart)
 
             # print(chart[['Open', 'Close']].tail(5))
@@ -375,8 +413,10 @@ if __name__ == "__main__":
             # add_basic(chart)
             chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Close'])
             
+            
+            
             add_swing_high_low(chart, width=2, only_entitiy=True, fill=False)
             save_folder = 'html'
-            save_filename = f'./{save_folder}/{ticker}_.html'
             os.makedirs(save_folder, exist_ok=True) 
-            chart_plot.plot_with_rci(save_filename, ticker, chart.tail(100), auto_open=False)
+            save_filename = f'./{save_folder}/{ticker}.html'
+            chart_plot.plot_simulationchart(save_filename, ticker, chart.tail(100), auto_open=False)
