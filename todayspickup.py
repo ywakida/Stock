@@ -38,7 +38,6 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
     # tickers_list = tickers_list.tail(150)
 
     ticker_chart = pandas.DataFrame() 
-    ticker_chart = ticker_chart.head(100)
 
     for ticker, row in tickers_list.iterrows():
            
