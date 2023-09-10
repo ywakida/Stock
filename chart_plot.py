@@ -143,7 +143,6 @@ def add_volume(figure, chart, row=1, col=1):
     # y軸名を定義
     figure.update_yaxes(title_text="出来高", row=row, col=col)
     
-    # 15分足の平均足の色
     if 'Volume' in chart.columns:
         figure.add_trace(go.Bar(x=chart.index, y=chart['Volume'], name='出来高', showlegend=False), row=row, col=col)
       
@@ -156,7 +155,8 @@ def add_rci(figure, chart, row=1, col=1):
     # y軸名を定義
     figure.update_yaxes(title_text="rci", row=row, col=col)
     
-    figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
+    if 'Rci' in chart.columns:
+        figure.add_trace(go.Scatter(x=chart.index, y=chart[f'Rci'], name=f'RCI', mode="lines", line=dict(color='yellow', width=2)), row=row, col=col)
     
     return figure
       
@@ -551,8 +551,8 @@ def plot_simulationchart2(filename, currency, chart, auto_open=False, keys={"S":
     # プロット
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
     
-    print('test')
-    plotly.offline.plot(fig, image='png', image_filename='test.png', output_type='file', image_width=1000, image_height=600, auto_open=False)
+    # print('test')
+    # plotly.offline.plot(fig, image='png', image_filename='test.png', output_type='file', image_width=1000, image_height=600, auto_open=False)
     
     
 if __name__ == "__main__":
@@ -592,6 +592,8 @@ if __name__ == "__main__":
         # heikinashi = heikinashi.tail(500)
         # plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
         plot_basicchart(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
+        
+        
         
         
         
