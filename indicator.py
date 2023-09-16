@@ -407,8 +407,6 @@ if __name__ == "__main__":
             add_sma_pattern(chart)
             # print(chart[['High', 'SwingHigh']].tail(100))
             
-            
-            
             # chart = create_heikinashi(chart)
             # add_basic(chart)
             chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Close'])

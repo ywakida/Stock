@@ -44,12 +44,12 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart = pandas.DataFrame()
         try:
             if debug == False:
-                # chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
-                file_name = f'{ohlc_folder}/{ticker}.csv'
-                chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
-                today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
-                chart = pandas.concat([chart, today_chart], sort=True) 
-                chart = chart[~chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
+                chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+                # file_name = f'{ohlc_folder}/{ticker}.csv'
+                # chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
+                # today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
+                # chart = pandas.concat([chart, today_chart], sort=True) 
+                # chart = chart[~chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
             else:
                 file_name = f'{ohlc_folder}/{ticker}.csv'   
                 print('ticker: ', ticker, ' filename: ', file_name)
