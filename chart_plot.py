@@ -77,7 +77,7 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
     # ろうそく足
     figure.add_trace(go.Candlestick(x=chart.index, open=chart['Open'], high=chart['High'], low=chart['Low'], close=chart['Close'], name='OHLC', increasing_line_width=1, increasing_line_color='red', increasing_fillcolor='red', decreasing_line_width=1, decreasing_line_color='lime', decreasing_fillcolor='lime'), row=row, col=col)
     
-    matypes={"S":"EMA", "M":"EMA", "L":"EMA", "LL":"EMA"}
+    matypes={"S":"SMA", "M":"SMA", "L":"SMA", "LL":"SMA"}
     colors={"S":"yellow", "M":"red", "L":"lime", "LL":"cyan"}
     for key, value in keys.items():
         thismatype = matypes.get(key)
@@ -113,9 +113,9 @@ def add_candlestick(figure, chart, row=1, col=1, keys={"S":5, "M":25, "L":75, "L
 
     if show_order:
         if 'Buy' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart[chart["Buy"]].index, y=chart[chart["Buy"]]["High"]*1.0002, name="買い", mode="markers", marker_symbol="arrow-right", marker_size=5, marker_color="white"), row=row, col=col)
+            figure.add_trace(go.Scatter(x=chart[chart["Buy"]].index, y=chart[chart["Buy"]]["High"]*1.0002, name="買い", mode="markers", marker_symbol="arrow-right", marker_size=7, marker_color="white"), row=row, col=col)
         if 'Sell' in chart.columns:
-            figure.add_trace(go.Scatter(x=chart[chart["Sell"]].index, y=chart[chart["Sell"]]["Low"]*0.9998, name="売り", mode="markers", marker_symbol="arrow-left", marker_size=5, marker_color="white"), row=row, col=col)
+            figure.add_trace(go.Scatter(x=chart[chart["Sell"]].index, y=chart[chart["Sell"]]["Low"]*0.9998, name="売り", mode="markers", marker_symbol="arrow-left", marker_size=7, marker_color="white"), row=row, col=col)
             
     # スケーリング機能
     if row==1:
@@ -387,7 +387,7 @@ def plot_with_heikinashi_candlestick2(filename, title, ohlc, heikinashi, auto_op
     fig = remove_gap_datetime(fig, ohlc)
     fig = remove_gap_datetime(fig, heikinashi)
     
-    fig = add_candlestick(fig, ohlc, 1, 1)
+    fig = add_candlestick(fig, ohlc, 1, 1, keys, show_swing=False, show_bollinger=True, show_order=False)
     fig = add_heikinashi2(fig, heikinashi, 2, 1)
     
     # プロット

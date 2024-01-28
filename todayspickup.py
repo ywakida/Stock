@@ -65,7 +65,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart.sort_index(inplace=True)
         chart = chart[~chart.index.duplicated(keep='last')]
             
-        indicator.add_basic(chart, [5, 25, 75, 100])
+        indicator.add_basic(chart, [5, 25, 75, 100, 200])
         indicator.add_swing_high_low(chart, width=3, only_entitiy=True)
         # print(chart)
         indicator.add_candlestick_pattern(chart)
@@ -97,6 +97,8 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart['Over75swinghigh'] = (chart['Swinghighover']) & (chart['crossdSMA75'])
         chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75']> 0)
         
+        chart['Perfect2575200'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200'])
+        
         # 変数への格納
         if date == chart.index[-1].date():
             timestamp = chart.index[-1]               
@@ -117,6 +119,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
             swinghigh = chart.at[timestamp, 'Swinghighover']
             over75swinghigh = chart.at[timestamp, 'Over75swinghigh']
             hanpatsu75 = chart.at[timestamp, 'Hanpatsu75']
+            perfect2575200 = chart.at[timestamp, 'Perfect2575200']
             
             try:
                 test_chart = pandas.DataFrame({'銘柄名':[name], 
@@ -135,12 +138,14 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                                             '75SMAと直近高値越':over75swinghigh,
                                             '直近高値':takane,
                                             '75反発':hanpatsu75,
+                                            'パーフェクトオーダー':perfect2575200,
                                             },
                                             index=[ticker])
             except Exception:
                 pass
         
             ticker_chart = pandas.concat([ticker_chart, test_chart], sort=False,)
+            ticker_chart.index.name = 'Ticker' # インデックスラベル名を作成
 
     # infを0に変換
     ticker_chart = ticker_chart.replace([numpy.inf, -numpy.inf], numpy.nan)
@@ -195,6 +200,10 @@ def change_view(debug=False):
         filename = f'./{todayspickup_folder}/hanpatsu75.csv'
         tickers_list[tickers_list['75反発']==True].to_csv(filename, header=True) # 保存
         
+        tickers_list = tickers_list.sort_values(by='パーフェクトオーダー', ascending=True)
+        filename = f'./{todayspickup_folder}/perfect2575200.csv'
+        tickers_list[tickers_list['パーフェクトオーダー']==True].to_csv(filename, header=True) # 保存
+        
 if __name__ == "__main__":
     
     os.system('cls')
@@ -210,23 +219,23 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    # date2 = datetime.datetime(2023, 7, 28).date()
-    # print(date2)
+    date2 = datetime.datetime(2024, 1, 26).date()
+    print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    # create_tickers(date2,True)
-    # change_view()
+    create_tickers(date2,True)
+    change_view()
     
-    ticker = 4824
-    start = time.time()
-    chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
-    print('100 ', time.time() - start)
-    # print(chart)
-    start = time.time()
-    file_name = f'{ohlc_folder}/{ticker}.csv'
-    chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
-    today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
-    chart = pandas.concat([chart, today_chart], sort=True)                
-    chart = chart[~chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
-    print('1 ', time.time() - start)
-    print(chart.tail(100))
+    # ticker = 4824
+    # start = time.time()
+    # chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+    # print('100 ', time.time() - start)
+    # # print(chart)
+    # start = time.time()
+    # file_name = f'{ohlc_folder}/{ticker}.csv'
+    # chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
+    # today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
+    # chart = pandas.concat([chart, today_chart], sort=True)                
+    # chart = chart[~chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
+    # print('1 ', time.time() - start)
+    # print(chart.tail(100))

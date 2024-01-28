@@ -7,6 +7,8 @@ import indicator
 import chart_plot
 import chart_days
 
+import mplfinance
+
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
 basepath = './'
@@ -22,7 +24,10 @@ def create_tickers(debug=False):
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
     # tickers_list = tickers_list[tickers_list.index == 2934] # Jフロンティア
-    tickers_list = tickers_list[tickers_list.index == 2437] # シンワワイズ
+    # tickers_list = tickers_list[tickers_list.index == 2437] # シンワワイズ
+    # tickers_list = tickers_list[tickers_list.index == 4174] # アピリッツ
+    tickers_list = tickers_list[tickers_list.index == 3624] # アクセルマーク
+    # tickers_list = tickers_list.head(10)
     
     count_Buy = 0
     count_Up1 = 0
@@ -53,6 +58,7 @@ def create_tickers(debug=False):
         chart = indicator.add_swing_high_low(chart, 5, True)
         chart = indicator.add_candlestick_pattern(chart)
         chart = indicator.add_sma_pattern(chart)
+        chart = indicator.add_rci(chart)
         
         # 買いの条件
         # chart['Buy'] = (chart['Close'] > chart['SMA75']) & (chart['Low'] < chart['SMA75']) & (chart['Close'] > chart['SwingHigh']) #& (chart['Ashi2'] == '陽たすき')
@@ -76,12 +82,9 @@ def create_tickers(debug=False):
         # ロスカット条件
         chart['Sell'] = (chart['Close'] < chart['BuyLow']) & (chart['Close'].shift() >= chart['BuyLow']) # 買ったときの安値を終値が下回ったとき
         chart['Sell'] |= (chart['Close'] < chart['SMA75']) & (chart['Close'].shift() >= chart['SMA75']) # または、SMAを下回ったとき
-        
-
     
-        print(chart[['Buy', 'Sell', 'SwingHigh', 'BuyClose', 'BuyLow', 'UnderUp', 'UnderUpHigh']].tail(2000))
+        # print(chart[['Buy', 'Sell', 'SwingHigh', 'BuyClose', 'BuyLow', 'UnderUp', 'UnderUpHigh']].tail(2000))
         
-                 
         chart['Up1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) # 翌日の高値
         chart['Up1_1'] = chart['Buy'] & (chart['High'].shift(-1) > chart['Close']) & (chart['Close'].shift(-1) > chart['Open'].shift(-1)) # 翌日の高値、かつ、陽線
         chart['Up2'] = chart['Buy'] & (chart['Close'].shift(-1) > chart['Close']) # 翌日の終値
@@ -94,8 +97,26 @@ def create_tickers(debug=False):
         count_Up2_1 += chart['Up2_1'].sum()
         
         save_filename = f'./simulation/{ticker}_.html'
-        # chart = indicator.add_bb(chart, [5, 25, 75, 100, 200])
+        chart = indicator.add_bb(chart, [5, 25, 75, 100, 200])
         chart_plot.plot_simulationchart(save_filename, ticker, chart, False)
+        # heikinashi = indicator.create_heikinashi(chart)
+        # chart_plot.plot_with_heikinashi_candlestick2(save_filename, ticker,chart.tail(200), heikinashi.tail(200), False)
+        
+        chart = chart.tail(200)
+        marketcolors = mplfinance.make_marketcolors(up='red',           # 上昇時のろうそくの塗りつぶし色
+                                                    down='green',       # 下降時のろうそくの塗りつぶし色
+                                                    inherit=True,       # エッジカラーを同じにする
+                                                    wick={'up':'red', 'down':'green'}   # 上昇時、下降時のろうそくの芯の色
+                                                    )
+        cs  = mplfinance.make_mpf_style(marketcolors=marketcolors, 
+                                        gridcolor="darkgray",           # チャートのグリッド色
+                                        facecolor="black",              # チャートの背景色
+                                        gridstyle=":"                  # チャートのグリッドの種類 "-":実線, "--":破線, ":":点線, "-.":破線と点線の組み合わせ
+                                        )
+        apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red"), mplfinance.make_addplot(chart['SMA75'], color="green")]
+        mplfinance.plot(chart, type='candle', datetime_format='%Y/%m/%d', savefig=dict(fname='test.png', dpi=500), figratio=(2,1), addplot=apd, style=cs, volume=True)
+        
+        print(chart.tail(2))
         
     print('Buy:', count_Buy)
     print('Up1:', count_Up1, ':', count_Up1_1)
