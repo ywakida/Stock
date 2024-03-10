@@ -22,9 +22,12 @@ def update_list():
     tickers_list = tickers_list[tickers_list['市場・商品区分']!='REIT・ベンチャーファンド・カントリーファンド・インフラファンド']
     tickers_list = tickers_list[tickers_list['市場・商品区分']!='出資証券']
     
+    for ticker, row in tickers_list.iterrows():
+        print(ticker)
+        
+    print('end')
     # 5ケタ以上は除く
-    tickers_list = tickers_list[tickers_list.index < 10000]
-    # tickers_list = tickers_list.head(5000)
+    # tickers_list = tickers_list[tickers_list.index < 10000]
      
     # Dataframeに列を追加
     tickers_list['出来高'] = 0
