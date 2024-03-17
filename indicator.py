@@ -249,7 +249,8 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             chart[f'UnderUpHigh'] = numpy.nan
             chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].mask((chart['UnderUp'].rolling(3, center=True).max() == chart['UnderUp']), chart['UnderUp'])
             chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].mask(chart['UnderUp'] == 0, 0)
-            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(method='bfill')
+            # chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(method='bfill')
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].bfill()
             chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(chart['UnderUp'][-1])
         
             # 前日終値がSMAより低く、かつ、当日、始値がSMAより低いところから、終値がSMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)

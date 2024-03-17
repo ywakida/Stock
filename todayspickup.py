@@ -67,7 +67,6 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
             
         indicator.add_basic(chart, [5, 25, 75, 100, 200])
         indicator.add_swing_high_low(chart, width=3, only_entitiy=True)
-        # print(chart)
         indicator.add_candlestick_pattern(chart)
         indicator.add_sma_pattern(chart)
         indicator.add_rci(chart, 9)
@@ -77,8 +76,8 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
         chart['出来高発行株式割合'] = (chart['Volume'] / row['発行株式'] * 100).round(1)
         chart['陽線陰線'] = '→'
-        chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑', inplace=True)
-        chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓', inplace=True)
+        chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑')
+        chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓')
         # chart['75over'] = 0
         # chart['75over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
         # chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
@@ -219,7 +218,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2024, 1, 26).date()
+    date2 = datetime.datetime(2024, 3, 15).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)

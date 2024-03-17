@@ -26,9 +26,9 @@ def create_tickers(debug=False):
     # tickers_list = tickers_list[tickers_list.index == 2934] # Jフロンティア
     # tickers_list = tickers_list[tickers_list.index == 2437] # シンワワイズ
     # tickers_list = tickers_list[tickers_list.index == 4174] # アピリッツ
-    tickers_list = tickers_list[tickers_list.index == 3624] # アクセルマーク
-    # tickers_list = tickers_list.head(10)
-    
+    # tickers_list = tickers_list[tickers_list.index == 3624] # アクセルマーク
+    tickers_list = tickers_list.head(2)
+
     count_Buy = 0
     count_Up1 = 0
     count_Up1_1 = 0
@@ -103,6 +103,7 @@ def create_tickers(debug=False):
         # chart_plot.plot_with_heikinashi_candlestick2(save_filename, ticker,chart.tail(200), heikinashi.tail(200), False)
         
         chart = chart.tail(200)
+        save_pngname = f'./simulation/{ticker}.png'
         marketcolors = mplfinance.make_marketcolors(up='red',           # 上昇時のろうそくの塗りつぶし色
                                                     down='green',       # 下降時のろうそくの塗りつぶし色
                                                     inherit=True,       # エッジカラーを同じにする
@@ -113,16 +114,19 @@ def create_tickers(debug=False):
                                         facecolor="black",              # チャートの背景色
                                         gridstyle=":"                  # チャートのグリッドの種類 "-":実線, "--":破線, ":":点線, "-.":破線と点線の組み合わせ
                                         )
-        apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red"), mplfinance.make_addplot(chart['SMA75'], color="green")]
-        mplfinance.plot(chart, type='candle', datetime_format='%Y/%m/%d', savefig=dict(fname='test.png', dpi=500), figratio=(2,1), addplot=apd, style=cs, volume=True)
+        # apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red"), mplfinance.make_addplot(chart['SMA75'], color="green")]
+        apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red")]
+        mplfinance.plot(chart, type='candle', datetime_format='%Y/%m/%d', savefig=dict(fname=save_pngname, dpi=500), figratio=(2,1), addplot=apd, style=cs, volume=True)
         
-        print(chart.tail(2))
+        # print(chart.tail(2))
+        print(chart['SMA25'])
+
         
     print('Buy:', count_Buy)
     print('Up1:', count_Up1, ':', count_Up1_1)
     print('Up2:', count_Up2, ':', count_Up2_1)
-    print('勝率1:', round(float(count_Up1)/count_Buy*100, 0), ' %')
-    print('勝率2:', round(count_Up2/count_Buy*100, 0), ' %')
+    # print('勝率1:', round(float(count_Up1)/count_Buy*100, 0), ' %')
+    # print('勝率2:', round(count_Up2/count_Buy*100, 0), ' %')
         # print(chart['Buy'].sum())
         # print(chart['Up1'].sum())
         # print(chart['Up2'].sum())
