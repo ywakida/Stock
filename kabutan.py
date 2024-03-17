@@ -31,7 +31,7 @@ class Kabutan():
         if self.__debug == True:
             print("ticker:", self.__ticker, ",len = ", len(data))
         # print(data)
-        
+        # print(self.__ticker, ": ", type(self.__ticker), " ", len(self.__ticker))
         if len(data) > 3:
             list = data[3]
             list.index.name = '項目'
@@ -91,18 +91,18 @@ class Kabutan():
                 except ValueError:
                     print('ticker:', self.__ticker, ' 発行済株式数なし')    
                 
-        if len(data) > 6:
-            list = data[6]
+        if len(data) > 8:
+            list = data[8]
             list.index.name = '項目'
             if self.__debug == True:
                 print('信用取引:', list)
             
             if '売り残' in list.columns and '買い残' in list.columns:
-                self.selling = float(list['売り残'][0])
-                self.purchase = float(list['買い残'][0])
+                self.selling = float(list['売り残'].iloc[0])
+                self.purchase = float(list['買い残'].iloc[0])
     
         if self.__debug == True:
-            print("ohlc: ", self.open, ", ", self.high, ", ", self.low, ", ", self.close, ", valume:", self.volume, ", tick:", self.tick, ", 売り残:", self.selling, ", 買い残:", self.purchase)
+            print("ohlc: ", self.open, " ", self.high, " ", self.low, " ", self.close, ", 出来高:", self.volume, ", tick:", self.tick, ", 売り残:", self.selling, ", 買い残:", self.purchase)
     
         if len(data) > 8:
             list = data[8]
@@ -115,10 +115,11 @@ if __name__ == "__main__":
     # kabutan = Kabutan(1401, True)
     #
     
-    tickers_file = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    for ticker, row in tickers_file.iterrows():
+    tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
+    # tickers_list = tickers_list[tickers_list.index == '1438']
+    for ticker, row in tickers_list.iterrows():
         kabutan = Kabutan(ticker, False)
-        print(kabutan.sharedunderstanding)
+        # print(ticker, ": ", kabutan.sharedunderstanding, ", ", kabutan.selling)
 
     # print(kabutan.sharedunderstanding)
     # print(kabutan.tradingvalue)

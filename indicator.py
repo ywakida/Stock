@@ -374,7 +374,7 @@ if __name__ == "__main__":
     # tickers_list = tickers_list[tickers_list.index == 3778] # さくらインターネット
     # tickers_list = tickers_list[tickers_list.index == 9522] # リニューアルブル 
     # tickers_list = tickers_list[tickers_list.index == 6194] # アトラエ
-    tickers_list = tickers_list[tickers_list.index == 4435] # カオナビ
+    tickers_list = tickers_list[tickers_list.index == '4435'] # カオナビ
     
     print(tickers_list)
     
