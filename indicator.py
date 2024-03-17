@@ -73,8 +73,8 @@ def add_sigma(chart, params=[20]):
     """     
     for param in params:
         chart[f'SIGMA{param}'] = (chart['Close'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)  # ddof = 0は母集団 
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
-        chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0), inplace=True)
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] >= 0), (chart['High'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0)),
+        chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].mask((chart[f'SIGMA{param}'] < 0), (chart['Low'] - chart['Close'].rolling(param).mean()) / chart['Close'].rolling(param).std(ddof = 0))
         # chart[f'SIGMA{param}'] = chart[f'SIGMA{param}'].ewm(span=5, adjust=False).mean()
     
     return chart 
@@ -184,8 +184,8 @@ def add_heikinashi(chart):
     
     # 陽線が1, 陰線が-1
     chart['HA_3V'] = 0
-    chart['HA_3V'].mask((chart['HA_Close'] > chart['HA_Open']), 1, inplace=True)
-    chart['HA_3V'].mask((chart['HA_Close'] < chart['HA_Open']), -1, inplace=True)
+    chart['HA_3V'] = chart['HA_3V'].mask((chart['HA_Close'] > chart['HA_Open']), 1)
+    chart['HA_3V'] = chart['HA_3V'].mask((chart['HA_Close'] < chart['HA_Open']), -1)
     
     # 平均足の実体差(=陽線、陰線判定)　陽線が>0, 陰線が<0
     chart['HA_BodyDiff'] = chart['HA_Close'] - chart['HA_Open']
@@ -202,15 +202,15 @@ def add_swing_high_low(chart, width=5, fill=False, only_entitiy=True):
     if only_entitiy:
         high = chart[['Open', 'Close']].max(axis=1)
         low = chart[['Open', 'Close']].min(axis=1)
-        chart[f'SwingHigh'].mask((high.rolling(window, center=True).max() == high), high, inplace=True)    
-        chart[f'SwingLow'].mask((low.rolling(window, center=True).min() == low), low, inplace=True)
+        chart[f'SwingHigh'] = chart[f'SwingHigh'].mask((high.rolling(window, center=True).max() == high), high)
+        chart[f'SwingLow'] = chart[f'SwingLow'].mask((low.rolling(window, center=True).min() == low), low)
     else:
-        chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'], inplace=True)    
-        chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'], inplace=True)
+        chart[f'SwingHigh'] = chart[f'SwingHigh'].mask((chart['High'].rolling(window, center=True).max() == chart['High']), chart['High'])
+        chart[f'SwingLow'] = chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'])
 
     if fill:
-        chart[f'SwingHigh'].fillna(method='ffill', inplace=True)
-        chart[f'SwingLow'].fillna(method='ffill', inplace=True)
+        chart[f'SwingHigh'] = chart[f'SwingHigh'].fillna(method='ffill')
+        chart[f'SwingLow'] = chart[f'SwingLow'].fillna(method='ffill')
         
     return chart
 
@@ -235,22 +235,22 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
         if f'SMA{sma}' in chart.columns:
             # 連続してSMAを終値が超えている回数
             chart[f'over{sma}'] = 0
-            chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1, inplace=True)
+            chart[f'over{sma}'] = chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1)
             y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
             chart[f'over{sma}'] = chart[f'over{sma}'] * y
             
             # 連続して下値を切り上げている回数
             chart[f'UnderUp'] = 0
-            chart[f'UnderUp'].mask(chart[['Close', 'Open']].min(axis='columns') > chart[['Close', 'Open']].min(axis='columns').shift(), 1, inplace=True)
+            chart[f'UnderUp'] = chart[f'UnderUp'].mask(chart[['Close', 'Open']].min(axis='columns') > chart[['Close', 'Open']].min(axis='columns').shift(), 1)
             y = chart[f'UnderUp'].groupby((chart[f'UnderUp'] != chart[f'UnderUp'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
             chart[f'UnderUp'] = chart[f'UnderUp'] * y
             
             # 連続して下値を切り上げている回数の最大
             chart[f'UnderUpHigh'] = numpy.nan
-            chart[f'UnderUpHigh'].mask((chart['UnderUp'].rolling(3, center=True).max() == chart['UnderUp']), chart['UnderUp'], inplace=True)
-            chart[f'UnderUpHigh'].mask(chart['UnderUp'] == 0, 0, inplace=True)
-            chart[f'UnderUpHigh'].fillna(method='bfill', inplace=True)
-            chart[f'UnderUpHigh'].fillna(chart['UnderUp'][-1], inplace=True)
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].mask((chart['UnderUp'].rolling(3, center=True).max() == chart['UnderUp']), chart['UnderUp'])
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].mask(chart['UnderUp'] == 0, 0)
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(method='bfill')
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(chart['UnderUp'][-1])
         
             # 前日終値がSMAより低く、かつ、当日、始値がSMAより低いところから、終値がSMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
             # chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
@@ -270,76 +270,76 @@ def add_candlestick_pattern(chart):
     # 実体の差分(陽線>0、陰線<0)
     chart['BodyDiff'] = chart['Close'] - chart['Open']
     chart['Ashi1'] = 'なし'
-    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']==chart['High']), '陽の丸坊主', inplace=True) # 強気線
-    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']<chart['High']), '陽の寄付坊主', inplace=True) # 強気線・上値暗示
-    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']==chart['High']), '陽の大引坊主', inplace=True) # 強気線・上値暗示
-    chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']<chart['High']), 'コマ・陽の極線', inplace=True) # 迷い
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']==chart['High']), '陽の丸坊主') # 強気線
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']==chart['Low']) & (chart['Close']<chart['High']), '陽の寄付坊主') # 強気線・上値暗示
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']==chart['High']), '陽の大引坊主') # 強気線・上値暗示
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']<chart['Close']) & (chart['Open']>chart['Low']) & (chart['Close']<chart['High']), 'コマ・陽の極線') # 迷い
     
-    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']==chart['High']), '陰の丸坊主', inplace=True) # 弱気線    
-    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']<chart['High']), '陰の大引坊主', inplace=True) # 弱気線・下値暗示
-    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']==chart['High']), '陰の寄付坊主', inplace=True) # 弱気線・下値暗示
-    chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']<chart['High']), 'コマ・陰の極線', inplace=True) # 迷い
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']==chart['High']), '陰の丸坊主') # 弱気線    
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']==chart['Low']) & (chart['Open']<chart['High']), '陰の大引坊主') # 弱気線・下値暗示
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']==chart['High']), '陰の寄付坊主') # 弱気線・下値暗示
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']>chart['Close']) & (chart['Close']>chart['Low']) & (chart['Open']<chart['High']), 'コマ・陰の極線') # 迷い
     
-    chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ', inplace=True) # 転換期
+    chart['Ashi1'] = chart['Ashi1'].mask((chart['Open']==chart['Close']) & (chart['Open']==chart['High']) & (chart['Close']>chart['Low']), 'トンボ') # 転換期
     
     chart['Ashi2'] = 'なし'
 
     # はらみ線
     # 高値圏で出現すれば天井
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陽の陽はらみ(高値圏で天井)', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽の陰はらみ(高値圏で天井)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陽の陽はらみ(高値圏で天井)')
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽の陰はらみ(高値圏で天井)')
     # 安値圏で出現すれば底
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陰の陰はらみ(安値圏で底)', inplace=True)
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰の陽はらみ(安値圏で底)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陰の陰はらみ(安値圏で底)')
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰の陽はらみ(安値圏で底)')
     
     # つつみ線
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽の陽つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陰の陽つつみ(下落から上昇)', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陽の陰つつみ', inplace=True)
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰の陰つつみ(上昇から下落)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Open'].shift()) & (chart['Close']>chart['Close'].shift()), '陽の陽つつみ')
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陰の陽つつみ(下落から上昇)')
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陽の陰つつみ')
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Open'].shift()) & (chart['Close']<chart['Close'].shift()), '陰の陰つつみ(上昇から下落)')
 
     # 出会い線
     deai_diff=1
     # 上昇基調のなかでは買いのサインです。
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陽振り分け(買い圧強)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陽振り分け(買い圧強)')
     # 下落基調の中では売りのサインです。
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陰振り分け(売り圧強)', inplace=True)    
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Close']>=chart['Close'].shift()-deai_diff) & (chart['Close']<=chart['Close'].shift()+deai_diff), '陰振り分け(売り圧強)') 
 
     # 振り分け線
     furiwake_diff=1
     # 上昇基調のなかでは買いのサインです。
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陽振り分け(上昇中買い)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陽振り分け(上昇中買い)')
     # 下落基調の中では売りのサインです。
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陰振り分け(下落中売り)', inplace=True)    
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']>=chart['Open'].shift()-furiwake_diff) & (chart['Open']<=chart['Open'].shift()+furiwake_diff), '陰振り分け(下落中売り)')    
     
     # たすき線
     # 下落基調では売りのサインです。逆のサイント勘違いしやすい
-    chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽たすき(下落中売り)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']<chart['Close']) & (chart['Open'].shift()>chart['Close'].shift()) & (chart['Open']>chart['Close'].shift()) & (chart['Close']>chart['Open'].shift()), '陽たすき(下落中売り)')
     # 上昇基調では買いのサインです。逆のサイント勘違いしやすい
-    chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰たすき(上昇中買い)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Open']>chart['Close']) & (chart['Open'].shift()<chart['Close'].shift()) & (chart['Open']<chart['Close'].shift()) & (chart['Close']<chart['Open'].shift()), '陰たすき(上昇中買い)')
 
 
     # 毛抜き天井・毛抜き底
     kenuki_diff=1
     # 2営業日の高値がほぼ同じ水準の場合。陰線・陽線の組み合わせは問いません。高値圏で現れれば天井が意識されているサインです。
-    chart['Ashi2'].mask((chart['High']>=chart['High'].shift()-kenuki_diff) & (chart['High']<=chart['High'].shift()+kenuki_diff), '毛抜き天井(高値圏売り)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['High']>=chart['High'].shift()-kenuki_diff) & (chart['High']<=chart['High'].shift()+kenuki_diff), '毛抜き天井(高値圏売り)')
     # 2営業日の安値がほぼ同じ水準の場合。陰線・陽線の組み合わせは問いません。安値圏で現れればそこが底値として意識されるサインです。
-    chart['Ashi2'].mask((chart['Low']>=chart['Low'].shift()-kenuki_diff) & (chart['Low']<=chart['Low'].shift()+kenuki_diff), '毛抜き底(安値圏買い)', inplace=True)
+    chart['Ashi2'] = chart['Ashi2'].mask((chart['Low']>=chart['Low'].shift()-kenuki_diff) & (chart['Low']<=chart['Low'].shift()+kenuki_diff), '毛抜き底(安値圏買い)')
 
     
     
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数
     chart['Hei'] = 0
-    chart['Hei'].mask((chart['Close'] > chart['Open']) & (chart['Close'].shift() > chart['Open'].shift()) & (chart['Close'] >= chart['Close'].shift()) & (chart['Open'] >= chart['Open'].shift()), 1, inplace=True)
-    chart['Hei'].mask((chart['Close'] < chart['Open']) & (chart['Close'].shift() < chart['Open'].shift()) & (chart['Close'] <= chart['Close'].shift()) & (chart['Open'] <= chart['Open'].shift()), -1, inplace=True)
+    chart['Hei'] = chart['Hei'].mask((chart['Close'] > chart['Open']) & (chart['Close'].shift() > chart['Open'].shift()) & (chart['Close'] >= chart['Close'].shift()) & (chart['Open'] >= chart['Open'].shift()), 1)
+    chart['Hei'] = chart['Hei'].mask((chart['Close'] < chart['Open']) & (chart['Close'].shift() < chart['Open'].shift()) & (chart['Close'] <= chart['Close'].shift()) & (chart['Open'] <= chart['Open'].shift()), -1)
     y = chart['Hei'].groupby((chart['Hei'] != chart['Hei'].shift()).cumsum()).cumcount() + 2 # 同じ数が連続している個数を算出
     chart['Hei'] = chart['Hei'] * y
     
     # 空
     chart['Ku'] = 0
-    chart['Ku'].mask((chart['Low'] > chart['High'].shift()), 1, inplace=True)
-    chart['Ku'].mask((chart['High'] < chart['Low'].shift()), -1, inplace=True)
+    chart['Ku'] = chart['Ku'].mask((chart['Low'] > chart['High'].shift()), 1)
+    chart['Ku'] = chart['Ku'].mask((chart['High'] < chart['Low'].shift()), -1)
     y = chart['Ku'].groupby((chart['Ku'] != chart['Ku'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
     chart['Ku'] = chart['Ku'] * y
     
