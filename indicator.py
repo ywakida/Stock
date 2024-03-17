@@ -84,7 +84,7 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
     for param in params:
         # 単純移動平均 Simple moving average
         chart[f'SMA{param}'] = chart['Close'].rolling(window=param, min_periods=1).mean()
-        # chart[f'SMA{param}'].fillna(method='bfill', inplace=True)
+        # chart[f'SMA{param}'] = chart[f'SMA{param}'].bfill()
         
         # 乖離率 Deviation rate
         # 乖離率は、一定以上のデータがないと有効でない
@@ -209,8 +209,8 @@ def add_swing_high_low(chart, width=5, fill=False, only_entitiy=True):
         chart[f'SwingLow'] = chart[f'SwingLow'].mask((chart['Low'].rolling(window, center=True).min() == chart['Low']), chart['Low'])
 
     if fill:
-        chart[f'SwingHigh'] = chart[f'SwingHigh'].fillna(method='ffill')
-        chart[f'SwingLow'] = chart[f'SwingLow'].fillna(method='ffill')
+        chart[f'SwingHigh'] = chart[f'SwingHigh'].ffill()
+        chart[f'SwingLow'] = chart[f'SwingLow'].ffill()
         
     return chart
 
@@ -251,7 +251,7 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].mask(chart['UnderUp'] == 0, 0)
             # chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(method='bfill')
             chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].bfill()
-            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(chart['UnderUp'][-1])
+            chart[f'UnderUpHigh'] = chart[f'UnderUpHigh'].fillna(chart['UnderUp'].iloc[-1])
         
             # 前日終値がSMAより低く、かつ、当日、始値がSMAより低いところから、終値がSMAを超えたかを確認する（当日の陽線およびSMAクロス、または、前日SMAより下で、当日SMAより上の陽線)
             # chart[f'crossdSMA{sma}'] = (chart['Close'] > chart['Open']) & (chart['Close'] > chart[f'SMA{sma}']) & ( (chart['Open'] < chart[f'SMA{sma}']) | (chart['Close'].shift(1) < chart[f'SMA{sma}'])) # True/False 陽線
