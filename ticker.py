@@ -25,8 +25,8 @@ def update_list(debug=False):
     # 5ケタ以上は除く
     tickers_list.index = tickers_list.index.map(str) # 文字列と数字が混在しているので文字列に変換する
     tickers_list = tickers_list[tickers_list.index.map(len) == 4] # 4文字のコードのみ対象とする
-    # for ticker, row in tickers_list.iterrows():
-    #     print(ticker,": ", type(ticker))
+    for ticker, row in tickers_list.iterrows():
+        print(ticker,": ", len(ticker))
     #     if type(ticker) is str:
     #         print(ticker, " is str")
     #     if type(ticker) is int:

@@ -114,8 +114,14 @@ def create_tickers(debug=False):
                                         facecolor="black",              # チャートの背景色
                                         gridstyle=":"                  # チャートのグリッドの種類 "-":実線, "--":破線, ":":点線, "-.":破線と点線の組み合わせ
                                         )
-        # apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red"), mplfinance.make_addplot(chart['SMA75'], color="green")]
-        apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red")]
+        if (numpy.isnan(chart['SMA25']).all() and numpy.isnan(chart['SMA75']).all()):
+            apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow")]
+        elif numpy.isnan(chart['SMA75']).all():
+            apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red")]
+        else:
+            apd = [ mplfinance.make_addplot(chart['SMA5'], color="yellow"), mplfinance.make_addplot(chart['SMA25'], color="red"), mplfinance.make_addplot(chart['SMA75'], color="green")]
+
+
         mplfinance.plot(chart, type='candle', datetime_format='%Y/%m/%d', savefig=dict(fname=save_pngname, dpi=500), figratio=(2,1), addplot=apd, style=cs, volume=True)
         
         # print(chart.tail(2))
