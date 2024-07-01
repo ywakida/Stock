@@ -44,7 +44,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart = pandas.DataFrame()
         try:
             if debug == False:
-                chart = yfinance.download(tickers=f'{ticker}.T', period='100d', interval='1d', progress=False)
+                chart = yfinance.download(tickers=f'{ticker}.T', period='3mo', interval='1d', progress=False)
                 # file_name = f'{ohlc_folder}/{ticker}.csv'
                 # chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
                 # today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
