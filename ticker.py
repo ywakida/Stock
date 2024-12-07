@@ -43,8 +43,6 @@ def update_list(debug=False):
     for ticker, row in tickers_list.iterrows():
         # print(tickers_list.at[ticker,'発行株式'])        
         # print(tickers_list.at[ticker,'発行株式'] == 0)
-        if debug:
-            print(ticker, ' :', datetime.datetime.now())    
     
         kabutan = Kabutan(ticker)
                
@@ -54,6 +52,9 @@ def update_list(debug=False):
         tickers_list.at[ticker,'約定回数'] = kabutan.tick
         tickers_list.at[ticker,'時価総額'] = kabutan.capitalization
         tickers_list.at[ticker,'発行株式'] = kabutan.sharedunderstanding
+
+        if debug:
+            print(ticker, ' :', datetime.datetime.now(), ' ', kabutan.volume, ' ', kabutan.tradingvalue, ' ', kabutan.tick, ' ', kabutan.capitalization, ' ', kabutan.sharedunderstanding)
      
     # 保存
     tickers_list.to_csv(output_filename)    
