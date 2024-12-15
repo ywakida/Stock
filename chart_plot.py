@@ -449,7 +449,7 @@ if __name__ == "__main__":
     os.makedirs(htmlfolder, exist_ok=True) 
     ohlcfolder = chart_days.daily_all_folder
     
-    # tickers_list = tickers_list.head(20)
+    tickers_list = tickers_list.head(1)
     for ticker, row in tickers_list.iterrows():
         print (f'{ticker}:')
         param = [5, 25, 75, 200]

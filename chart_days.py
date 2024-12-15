@@ -31,6 +31,7 @@ def create_daily_chart_csv(ticker):
         
         # ダウンロードし、空データでなく、ヘッダのみでもない場合、保存する
         new_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period='max', progress=False)
+        new_chart.columns = new_chart.columns.get_level_values(0)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない                
                 new_chart.to_csv(daily_all_filename, header=True) # 保存
@@ -40,7 +41,9 @@ def create_daily_chart_csv(ticker):
     else:
         # csvファイルを読み取り、最新日付を取得する
         daily_chart =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
-
+        # print(daily_chart)
+        # daily_chart.index = pandas.to_datetime(daily_chart.index)
+        
         # ファイルにデータがある場合は、ファイル内の最新日付から本日までのデータを追加更新を実施する
         if len(daily_chart) > 1:
             last_date = daily_chart.index[-1].date()
@@ -48,14 +51,23 @@ def create_daily_chart_csv(ticker):
             today = datetime.date.today()
             delta_date = today - last_date
             delta_days = delta_date.days
-
-            if delta_days < 5:
-                delta_days = 5
-          
+                      
             update_chart = pandas.DataFrame()        
             try:
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
-                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'7d', progress=False)
+                # if delta_days < 5:
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'5d', progress=False)
+                # elif delta_days < 20:
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
+                # elif delta_days < 60:
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False)
+                # else:
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False)
+
+
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
+                update_chart.columns = update_chart.columns.get_level_values(0)
+                
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
             except Exception:
                 pass
@@ -90,13 +102,14 @@ def update_ohlc_1day():
         create_daily_chart_csv(ticker)
 
 
-def save_online_ohlc(ticker, interval, folder):
+def save_online_ohlc(ticker, interval, period, folder):
     """ OHLCデータをオンラインから入手する
     """    
     save_filename = f'{folder}/{ticker}.csv'          
     ohlc = pandas.DataFrame()
     try:
-        ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period='7d', progress=False)
+        ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period=period, progress=False)
+        ohlc.columns = ohlc.columns.get_level_values(0)
     except Exception:
         pass 
 
@@ -118,28 +131,30 @@ def task(debug=False):
     time_5minutes = 0
     
     if debug:
-        tickers_file = tickers_file.head(100)
+        # tickers_file = tickers_file[tickers_file.index >= '9000']
+        tickers_file = tickers_file.head(200)
     
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
-        # print(ticker)
+        if debug:
+            print(ticker)
         
         ite1 = time.time()
         create_daily_chart_csv(ticker)
         ite2 = time.time()
         folder = f'{basepath}{per1minute_folder}'
-        save_online_ohlc(ticker, '1m', folder)
+        save_online_ohlc(ticker, '1m', '5d', folder)
         ite3 = time.time()
         folder = f'{basepath}{per5minutes_folder}'
-        save_online_ohlc(ticker, '5m', folder)          
+        save_online_ohlc(ticker, '5m', '1mo', folder)          
         ite4 = time.time()
         
         if debug:
-            time_daily += ite2-ite1
+            time_daily += ite2 - ite1
             time_1minute += ite3 - ite2
             time_5minutes += ite4 - ite3
 
-    print(round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
+    print("time: ", round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
 
     print('end:', datetime.datetime.now())
     
@@ -153,6 +168,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    task()
+    task(False)
  
             
