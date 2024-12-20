@@ -88,7 +88,7 @@ def add_basic(chart, params=[5, 20, 25, 60, 75, 100, 200]):
         
         # 乖離率 Deviation rate
         # 乖離率は、一定以上のデータがないと有効でない
-        chart[f'DR{param}']   = (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}'] * 100
+        chart[f'DR{param}']   = ( (chart['Close'] - chart[f'SMA{param}']) / chart[f'SMA{param}']).astype(float) * 100
        
         # 前日からの傾き
         chart[f'Slope{param}'] = chart[f'SMA{param}'].diff(1)

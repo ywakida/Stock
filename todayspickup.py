@@ -221,8 +221,8 @@ if __name__ == "__main__":
     date2 = datetime.datetime(2024, 3, 15).date()
     print(date2)
     # test(date2)
-    # create_tickers(datetime.datetime.today().date(),True)
-    create_tickers(date2,True)
+    create_tickers(datetime.datetime.today().date(),True)
+    # create_tickers(date2,True)
     change_view()
     
     # ticker = 4824
