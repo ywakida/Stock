@@ -39,12 +39,12 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
 
     ticker_chart = pandas.DataFrame() 
 
-    for ticker, row in tickers_list.iterrows():
-           
+    for ticker, row in tickers_list.iterrows():  
         chart = pandas.DataFrame()
         try:
             if debug == False:
                 chart = yfinance.download(tickers=f'{ticker}.T', period='1mo', interval='1d', progress=False)
+                chart.columns = chart.columns.get_level_values(0)
                 # file_name = f'{ohlc_folder}/{ticker}.csv'
                 # chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
                 # today_chart = yfinance.download(tickers=f'{ticker}.T', period='1d', interval='1d', progress=False)
@@ -218,11 +218,11 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2024, 3, 15).date()
+    date2 = datetime.datetime(2024, 12, 19).date()
     print(date2)
     # test(date2)
-    create_tickers(datetime.datetime.today().date(),True)
-    # create_tickers(date2,True)
+    # create_tickers(datetime.datetime.today().date(),True)
+    create_tickers(date2,False)
     change_view()
     
     # ticker = 4824
