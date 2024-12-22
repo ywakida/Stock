@@ -2,7 +2,7 @@ import pandas
 import datetime
 import os
 import yfinance
-import time
+import json
 import numpy
 import indicator
 from zoneinfo import ZoneInfo
@@ -55,12 +55,14 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                 file_name = f'{ohlc_folder}/{ticker}.csv'   
                 print('ticker: ', ticker, ' filename: ', file_name)
                 chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
-                
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON for ticker {ticker}: {e}")
+            
         except Exception as e:
             print(f"Failed to retrieve data for ticker {ticker}: {e}")
         
         if chart.empty:
-            print('ticker: ', ticker, ' is empty.')
+            print('ticker: ', ticker, ' data is empty.')
             continue 
         
         chart.sort_index(inplace=True)
