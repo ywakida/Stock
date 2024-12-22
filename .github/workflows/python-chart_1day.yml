@@ -13,8 +13,8 @@ on:
   workflow_dispatch:
   
   schedule:
-  # every 8:30(UTC) = 17:30(JST) 平日のみ
-  - cron:  '30 08 * * 1-5'
+  # every 8:00(UTC) = 17:00(JST) 平日のみ
+  - cron:  '00 08 * * 1-5'
 jobs:
   build:
 
