@@ -330,7 +330,7 @@ def plot_with_slope(filename, title, chart, auto_open=False, keys={"S":5, "M":20
     fig = add_graphsetting(fig)
     
     # X軸から空白期間を除外する
-    fig = remove_gap_datetime(fig, chart)
+    fig = remove_weekend(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_slope(fig, chart, 2, 1)
@@ -348,7 +348,7 @@ def plot_with_heikinashi_candlestick(filename, title, chart, auto_open=False, ke
     fig = add_graphsetting(fig)
     
     # X軸から空白期間を除外する
-    fig = remove_gap_datetime(fig, chart)
+    fig = remove_weekend(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_heikinashi_candlestick(fig, chart, 1, 1)
@@ -366,7 +366,7 @@ def plot_with_heikinashi_bar(filename, title, chart, auto_open=False, keys={"S":
     fig = add_graphsetting(fig)
     
     # X軸から空白期間を除外する
-    fig = remove_gap_datetime(fig, chart)
+    fig = remove_weekend(fig, chart)
     
     fig = add_candlestick(fig, chart, 1, 1)
     fig = add_heikinashi_bar(fig, chart, 2, 1)
@@ -449,7 +449,7 @@ if __name__ == "__main__":
     os.makedirs(htmlfolder, exist_ok=True) 
     ohlcfolder = chart_days.daily_all_folder
     
-    tickers_list = tickers_list.head(1)
+    # tickers_list = tickers_list.head(1)
     for ticker, row in tickers_list.iterrows():
         print (f'{ticker}:')
         param = [5, 25, 75, 200]
@@ -464,15 +464,16 @@ if __name__ == "__main__":
         ohlc = indicator.add_basic(ohlc, param)
         ohlc = indicator.add_sma_dr(ohlc, param)
         ohlc = indicator.add_swing_high_low(ohlc)
+        ohlc = indicator.add_heikinashi(ohlc)
         # heikinashi = indicator.create_heikinashi(ohlc)
         
-        ohlc = ohlc.tail(1000)
+        # ohlc = ohlc.tail(1000)
         # heikinashi = heikinashi.tail(500)
         # plot_with_dr(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
         plot_basicchart(f'{htmlfolder}/{ticker}.html', ticker, ohlc)
         
         
-        
+        # plot_with_heikinashi_bar(f'{htmlfolder}/{ticker}_heikin.html', ticker, ohlc)
         
         
     #       S   M   L   LL
