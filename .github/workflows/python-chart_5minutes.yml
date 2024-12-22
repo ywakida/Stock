@@ -12,9 +12,9 @@ on:
   
   workflow_dispatch:
   
-  schedule:
+#  schedule:
   # every 9:00(UTC) = 18:00(JST) 平日のみ
-  # - cron:  '00 09 * * 1-5'
+#  - cron:  '00 09 * * 1-5'
 jobs:
   build:
 
