@@ -120,7 +120,7 @@ def save_online_ohlc(ticker, interval, period, folder):
     # print(ohlc.tail(100))
     print(f"{save_filename} is updated")
 
-def SaveOhlc_1minute(debug=False):
+def save_latest_ohlc_1minute(debug=False):
     """ 1分足のOHLCデータをオンラインから入手する
     """ 
     # 銘柄一覧の読み出し
@@ -142,7 +142,7 @@ def SaveOhlc_1minute(debug=False):
 
     print('end:', datetime.datetime.now())
     
-def SaveOhlc_5minute(debug=False):
+def save_latest_ohlc_5minutes(debug=False):
     """ 5分足のOHLCデータをオンラインから入手する
     """ 
     # 銘柄一覧の読み出し
