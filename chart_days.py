@@ -3,6 +3,7 @@ import datetime
 import os
 import yfinance
 import time
+import json
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
@@ -108,10 +109,30 @@ def save_online_ohlc(ticker, interval, period, folder):
     save_filename = f'{folder}/{ticker}.csv'          
     ohlc = pandas.DataFrame()
     try:
+        retry = False
         ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period=period, progress=False)
         ohlc.columns = ohlc.columns.get_level_values(0)
-    except Exception:
-        pass 
+        
+    except json.JSONDecodeError as e:
+        print(f"Failed to decode JSON for ticker {ticker}: {e}")
+        retry = True
+        
+    except Exception as e:
+        print(f"Failed to retrieve data for ticker {ticker}: {e}")
+        
+    while retry == True:
+        time.sleep(3)
+        try:
+            retry = False
+            ohlc = yfinance.download(tickers=f'{ticker}.T', interval=interval, period=period, progress=False)
+            ohlc.columns = ohlc.columns.get_level_values(0)
+            
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON for ticker {ticker}: {e}")
+            retry = True
+            
+        except Exception as e:
+            print(f"Failed to retrieve data for ticker {ticker}: {e}")
 
     if not ohlc.empty:
         if len(ohlc)>1:
