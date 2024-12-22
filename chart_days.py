@@ -185,7 +185,7 @@ def task(debug=False):
         ite1 = time.time()
         create_daily_chart_csv(ticker)
         ite2 = time.time()
-        
+        time.sleep(3)
         if debug:
             time_daily += ite2 - ite1
             print("time: ", round(time_daily, 3))
