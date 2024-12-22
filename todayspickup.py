@@ -39,7 +39,8 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
 
     ticker_chart = pandas.DataFrame() 
 
-    for ticker, row in tickers_list.iterrows():  
+    for ticker, row in tickers_list.iterrows():
+        print(ticker)
         chart = pandas.DataFrame()
         try:
             if debug == False:
@@ -55,11 +56,11 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                 print('ticker: ', ticker, ' filename: ', file_name)
                 chart = pandas.read_csv(file_name, index_col=0, parse_dates=True)
                 
-        except:
-            pass
+        except Exception as e:
+            print(f"Failed to retrieve data for ticker {ticker}: {e}")
         
         if chart.empty:
-            print('ticker: ', ticker, ' filename: ', file_name, ' is empty.')
+            print('ticker: ', ticker, ' is empty.')
             continue 
         
         chart.sort_index(inplace=True)
@@ -218,7 +219,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2024, 12, 19).date()
+    date2 = datetime.datetime(2024, 12, 20).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
