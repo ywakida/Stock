@@ -120,6 +120,51 @@ def save_online_ohlc(ticker, interval, period, folder):
     # print(ohlc.tail(100))
     print(f"{save_filename} is updated")
 
+def SaveOhlc_1minute(debug=False):
+    """ 1分足のOHLCデータをオンラインから入手する
+    """ 
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+
+    folder = f'{basepath}{per1minute_folder}'
+    os.makedirs(folder, exist_ok=True)
+    
+    if debug:
+        tickers_file = tickers_file.head(200)
+    
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        if debug:
+            print(ticker)
+        
+        save_online_ohlc(ticker, '1m', '5d', folder)
+
+    print('end:', datetime.datetime.now())
+    
+def SaveOhlc_5minute(debug=False):
+    """ 5分足のOHLCデータをオンラインから入手する
+    """ 
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+
+    folder = f'{basepath}{per5minutes_folder}'
+    os.makedirs(folder, exist_ok=True)
+    
+    if debug:
+        tickers_file = tickers_file.head(200)
+    
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        if debug:
+            print(ticker)
+        
+        save_online_ohlc(ticker, '5m', '1mo', folder)
+
+    print('end:', datetime.datetime.now())    
+
+
 def task(debug=False):
 
     # 銘柄一覧の読み出し
@@ -127,8 +172,6 @@ def task(debug=False):
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
     
     time_daily = 0
-    time_1minute = 0
-    time_5minutes = 0
     
     if debug:
         # tickers_file = tickers_file[tickers_file.index >= '9000']
@@ -142,19 +185,10 @@ def task(debug=False):
         ite1 = time.time()
         create_daily_chart_csv(ticker)
         ite2 = time.time()
-        folder = f'{basepath}{per1minute_folder}'
-        save_online_ohlc(ticker, '1m', '5d', folder)
-        ite3 = time.time()
-        folder = f'{basepath}{per5minutes_folder}'
-        save_online_ohlc(ticker, '5m', '1mo', folder)          
-        ite4 = time.time()
         
         if debug:
             time_daily += ite2 - ite1
-            time_1minute += ite3 - ite2
-            time_5minutes += ite4 - ite3
-
-    print("time: ", round(time_daily, 3), ", ", round(time_1minute, 3), ", ", round(time_5minutes, 3))
+            print("time: ", round(time_daily, 3))
 
     print('end:', datetime.datetime.now())
     
