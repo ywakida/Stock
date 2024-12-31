@@ -34,13 +34,14 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
           ref: ${{ github.head_ref }}
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.13"
+        cache: 'pip' # caching pip dependencies
     - name: git config
       run: |
         git config --global user.name "ywakida"
