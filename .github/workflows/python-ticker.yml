@@ -36,21 +36,21 @@ jobs:
       with:
           ref: ${{ github.head_ref }}
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.13"
         cache: 'pip' # caching pip dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install yfinance pandas_datareader xlrd
+        # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: git config
       run: |
         git config --global user.name "ywakida"
         git config --global user.email "y.wakida.business@gmai.com"
         git config --global core.filemode false # ignore file permission
         git config --global pull.rebase true
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install yfinance pandas_datareader xlrd
-        # if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: ticker update
       run: |
         # update ticker list
