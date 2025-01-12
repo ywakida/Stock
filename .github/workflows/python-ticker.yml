@@ -17,21 +17,29 @@ on:
   - cron:  '0 3 * * 6'
 jobs:
   csv_update:
-
+    permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      issues: write
+      packages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
     steps:
     - uses: actions/checkout@v4
       with:
           ref: ${{ github.head_ref }}
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
         python-version: "3.13"
         cache: 'pip' # caching pip dependencies
-        
     - name: git config
       run: |
         git config --global user.name "ywakida"
@@ -43,7 +51,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install yfinance pandas_datareader xlrd
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        
     - name: ticker update
       run: |
         # update ticker list
