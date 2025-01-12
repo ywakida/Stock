@@ -32,9 +32,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref }} # ブランチ名
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
