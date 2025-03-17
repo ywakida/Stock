@@ -209,7 +209,7 @@ def task_new(debug=False):
         
     # 3. 最新データを一括取得（本日のデータ）
     try:
-        tickers_ohlc = yfinance.download(tickers.tolist(), period="1d", interval='1d', group_by="ticker", threads=True, progress=False)
+        tickers_ohlc = yfinance.download(tickers.tolist(), period="1d", interval='1d', group_by="ticker", progress=False, auto_adjust=False, threads=True)
     except Exception:
         pass
     
