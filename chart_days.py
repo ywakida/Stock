@@ -66,7 +66,7 @@ def create_daily_chart_csv(ticker):
                 #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False)
 
 
-                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'5d', progress=False)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
                 update_chart.columns = update_chart.columns.get_level_values(0)
                 
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
@@ -184,6 +184,45 @@ def save_latest_ohlc_5minutes(debug=False):
         save_online_ohlc(ticker, '5m', '1mo', folder)
 
     print('end:', datetime.datetime.now())    
+
+
+def task_new(debug=False):
+
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+    
+    time_daily = 0
+    
+    if debug:
+        # tickers_file = tickers_file[tickers_file.index >= '9000']
+        tickers_file = tickers_file.head(100)
+
+    # 1. 東証の全銘柄リストを取得（事前に用意した CSV ファイルを読み込む）
+    csv_path = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    ohlc = pandas.read_csv(csv_path, dtype={'コード': str})
+
+    # 2. yfinance 用に 4桁の証券コードに「.T」を付ける
+    tickers = ohlc['コード'].astype(str).str.zfill(4) + ".T"
+
+    # 3. 最新データを一括取得（本日のデータ）
+    data = yfinance.download(tickers.tolist(), period="1d", group_by="ticker", threads=True, progress=False)
+    update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
+
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        if debug:
+            print(ticker)
+        
+        ite1 = time.time()
+        create_daily_chart_csv(ticker)
+        ite2 = time.time()
+        time.sleep(1)
+        if debug:
+            time_daily += ite2 - ite1
+            print("time: ", round(time_daily, 3))
+
+    print('end:', datetime.datetime.now())
 
 
 def task(debug=False):
