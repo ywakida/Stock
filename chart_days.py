@@ -193,34 +193,67 @@ def task_new(debug=False):
     tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
     
     time_daily = 0
-    
-    if debug:
-        # tickers_file = tickers_file[tickers_file.index >= '9000']
-        tickers_file = tickers_file.head(100)
 
     # 1. 東証の全銘柄リストを取得（事前に用意した CSV ファイルを読み込む）
     csv_path = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
-    ohlc = pandas.read_csv(csv_path, dtype={'コード': str})
+    tickers = pandas.read_csv(csv_path, dtype={'コード': str})
 
     # 2. yfinance 用に 4桁の証券コードに「.T」を付ける
-    tickers = ohlc['コード'].astype(str).str.zfill(4) + ".T"
+    tickers = tickers['コード'].astype(str).str.zfill(4) + ".T"
 
-    # 3. 最新データを一括取得（本日のデータ）
-    data = yfinance.download(tickers.tolist(), period="1d", group_by="ticker", threads=True, progress=False)
-    update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
-
+    if debug:
+        # tickers_file = tickers_file[tickers_file.index >= '9000']
+        tickers = tickers.head(100)
+        
     print('start:', datetime.datetime.now())
-    for ticker, row in tickers_file.iterrows():
+        
+    # 3. 最新データを一括取得（本日のデータ）
+    try:
+        tickers_ohlc = yfinance.download(tickers.tolist(), period="1d", interval='1d', group_by="ticker", threads=True, progress=False)
+    except Exception:
+        pass
+    
+    for ticker, row in tickers.iterrows():
         if debug:
             print(ticker)
+            
+        daily_all_filename = f'{basepath}{daily_all_folder}/{ticker}.csv'
+        daily_100_filename = f'{basepath}{daily_100_folder}/{ticker}.csv'
+    
+        # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
+        if not os.path.exists(daily_all_filename):
+            
+            # 空データでなく、ヘッダのみでもない場合、保存する
+            daily_ohlc = tickers_ohlc[ticker]
+            # new_ohlc.columns = new_ohlc.columns.get_level_values(0)
+            if not daily_ohlc.empty: # 空データでない
+                if len(daily_ohlc) > 1: # ヘッダのみでない                
+                    daily_ohlc.to_csv(daily_all_filename, header=True) # 保存
+                    print(f'{daily_all_filename} is created.')
         
-        ite1 = time.time()
-        create_daily_chart_csv(ticker)
-        ite2 = time.time()
-        time.sleep(1)
-        if debug:
-            time_daily += ite2 - ite1
-            print("time: ", round(time_daily, 3))
+        else:
+            daily_ohlc =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
+            
+            if len(daily_ohlc) > 1:
+                last_date = daily_ohlc.index[-1].date()
+                today = datetime.date.today()
+                delta_date = today - last_date
+                delta_days = delta_date.days
+                        
+                update_chart = tickers_ohlc[ticker]
+                
+                if not update_chart.empty:
+                    if len(update_chart) > 1:  
+                        daily_chart = pandas.concat([daily_chart, update_chart], sort=True)
+                        daily_chart = daily_chart[~daily_chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
+                        daily_chart.sort_index(inplace=True)
+                        daily_chart.to_csv(daily_all_filename, header=True) # 保存
+                        daily_chart.tail(100).to_csv(daily_100_filename, header=True) # 保存
+                        
+                        print(f"{daily_all_filename} and {daily_100_filename} is updated")        
+            
+            else:
+                print(f'{daily_all_filename} is incorrect.')
 
     print('end:', datetime.datetime.now())
 
