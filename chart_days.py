@@ -31,7 +31,7 @@ def create_daily_chart_csv(ticker):
     if not os.path.exists(daily_all_filename):
         
         # ダウンロードし、空データでなく、ヘッダのみでもない場合、保存する
-        new_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period='max', progress=False)
+        new_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period='max', progress=False, auto_adjust=False, threads=True)
         new_chart.columns = new_chart.columns.get_level_values(0)
         if not new_chart.empty: # 空データでない
             if len(new_chart) > 1: # ヘッダのみでない                
@@ -66,7 +66,7 @@ def create_daily_chart_csv(ticker):
                 #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False)
 
 
-                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False, auto_adjust=False, threads=True)
                 update_chart.columns = update_chart.columns.get_level_values(0)
                 
                 # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
