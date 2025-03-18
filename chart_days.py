@@ -55,22 +55,25 @@ def create_daily_chart_csv(ticker):
                       
             update_chart = pandas.DataFrame()        
             try:
-                # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False)
+                # update_chart = yfinance.download(tickers=f'{ticker}.T', period=f'{delta_days}d', interval='1d', progress=False, auto_adjust=False, threads=True)
                 # if delta_days < 5:
-                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'5d', progress=False)
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'5d', progress=False, auto_adjust=False, threads=True)
                 # elif delta_days < 20:
-                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False)
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False, auto_adjust=False, threads=True)
                 # elif delta_days < 60:
-                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False)
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False, auto_adjust=False, threads=True)
                 # else:
-                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False)
+                #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False, auto_adjust=False, threads=True)
 
 
                 update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False, auto_adjust=False, threads=True)
                 update_chart.columns = update_chart.columns.get_level_values(0)
                 
-                # update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'max', progress=False)
-            except Exception:
+                if update_chart.empty:
+                    print(f"Warning: No data found for {ticker}. The ticker may be incorrect or data may be unavailable.")
+                 
+            except Exception as e:
+                print(f"Error retrieving data for {ticker}: {e}")
                 pass
             
           # update_chart = update_chart[:-1] # 末尾行は削除        
