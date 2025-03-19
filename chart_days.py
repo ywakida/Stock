@@ -20,6 +20,62 @@ os.makedirs(per1minute_folder, exist_ok=True)
 os.makedirs(per5minutes_folder, exist_ok=True)
 os.makedirs(daily_100_folder, exist_ok=True)
 
+def create_daily_chart_csv2(ticker, folder=".", debug=False):
+    """ 日足チャートのCSVの作成
+    """      
+    # ファイルの指定
+    daily_all_filename = f'{basepath}{folder}/{ticker}.csv'
+    
+    try:
+        daily_chart =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
+        last_date = daily_chart["Date"].max() # 最後のデータの日付
+        if debug:
+            print(f"{ticker}: CSV内の最新データ日付: {last_date.date()}")
+        
+    except Exception as e:
+        print(f"CSVを読み込めませんでした: {e}")
+        last_date = None
+    
+    update_chart = pandas.DataFrame()
+    # ファイルが存在しない場合は、全てのデータをダウンロードする
+    if last_date is None:
+        start_date = "1900-01-01" # CSVがない場合のデフォルト開始日
+        update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period='max', progress=False, auto_adjust=False, threads=True)
+        update_chart.columns = update_chart.columns.get_level_values(0)
+        
+        if not update_chart.empty: # 空データでない
+            if len(update_chart) > 1: # ヘッダのみでない                
+                update_chart.to_csv(daily_all_filename, header=True) # 保存
+                print(f'{daily_all_filename} is created new.')
+
+    # ファイルが存在する場合は、既存のファイルに新しいデータを追加更新する
+    else:
+        # start_date = last_date + datetime.timedelta(days=1) # 最後の日の翌日から取得
+        start_date = last_date - datetime.timedelta(weeks=1) # 最後の日の１週間前から取得
+        start_date_str = start_date.strftime("%Y-%m-%d")
+        end_date_str = datetime.today().strftime("%Y-%m-%d")
+        print(f"{ticker}: {start_date_str} から {end_date_str} までのデータを取得します...")
+        try:
+            update_chart = yfinance.download(tickers=f'{ticker}.T', start=start_date_str, end=end_date_str, progress=False, auto_adjust=False, threads=True)
+            update_chart.columns = update_chart.columns.get_level_values(0)
+            
+            if update_chart.empty:
+                print(f"Warning: No data found for {ticker}. The ticker may be incorrect or data may be unavailable.")
+                
+        except Exception as e:
+            print(f"Error retrieving data for {ticker}: {e}")
+            pass     
+    
+        if not update_chart.empty and len(update_chart) > 1: # 空データでない、かつ、ヘッダのみでない
+            daily_chart = pandas.concat([daily_chart, update_chart], sort=True)
+            daily_chart = daily_chart[~daily_chart.index.duplicated(keep='last')] # 日付に重複があれば最新で更新する
+            daily_chart.sort_index(inplace=True)
+            daily_chart.to_csv(daily_all_filename, header=True) # 保存                    
+            print(f"{daily_all_filename} is updated")
+        else:
+        #   daily_chart = yfinance.download(tickers=f'{ticker}.T', period='max', progress=False)
+        #   daily_chart.to_csv(file_name, header=True) # 保存
+            print(f'{daily_all_filename} is incorrect.')
 
 def create_daily_chart_csv(ticker):
     """ 日足チャートのCSVの作成
@@ -288,7 +344,37 @@ def task(debug=False):
 
     print('end:', datetime.datetime.now())
     
+def task2(debug=False):
 
+    # フォルダの指定
+    folder = 'ohlc_daily_all2'
+    os.makedirs(folder, exist_ok=True)
+
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+    
+    time_daily = 0
+    
+    if debug:
+        # tickers_file = tickers_file[tickers_file.index >= '9000']
+        tickers_file = tickers_file.head(200)
+    
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        if debug:
+            print(ticker)
+        
+        ite1 = time.time()
+        create_daily_chart_csv2(ticker, folder, debug)
+        ite2 = time.time()
+        time.sleep(1)
+        if debug:
+            time_daily += ite2 - ite1
+            print("time: ", round(time_daily, 3))
+
+    print('end:', datetime.datetime.now())
+ 
 if __name__ == "__main__":
     
     os.system('cls')
