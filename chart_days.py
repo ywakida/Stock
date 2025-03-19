@@ -122,7 +122,7 @@ def create_daily_chart_csv(ticker):
                 #     update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1y', progress=False, auto_adjust=False, threads=True)
 
 
-                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'3mo', progress=False, auto_adjust=False, threads=True)
+                update_chart = yfinance.download(tickers=f'{ticker}.T', interval='1d', period=f'1mo', progress=False, auto_adjust=False, threads=True)
                 update_chart.columns = update_chart.columns.get_level_values(0)
                 
                 if update_chart.empty:
