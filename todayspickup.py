@@ -8,6 +8,11 @@ import indicator
 from zoneinfo import ZoneInfo
 import chart_days
 
+# コンフィグ
+# gdrivepath = '/content/drive/My Drive/stock/'
+basepath = './'
+encode = 'utf-8'
+
 ohlc_folder = chart_days.daily_100_folder
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
@@ -28,7 +33,28 @@ def test(date=datetime.datetime.today().date(), debug=False):
     else:
         print(f"{date} is not found")
     
-    
+
+def create_tickers2(date=datetime.datetime.today().date(), debug=False):
+    try:
+        # 1. 東証の全銘柄リストを取得（事前に用意した CSV ファイルを読み込む）
+        csv_path = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+        tickers = pandas.read_csv(csv_path, dtype={'コード': str}, header=0, index_col=0)
+        
+        # 2. yfinance 用に 4桁の証券コードに「.T」を付ける
+        tickers = tickers['コード'].astype(str).str.zfill(4) + ".T"
+        
+    except Exception as e:
+        print(f"CSVを読み込めませんでした: {e}")
+        
+    if not tickers.empty and len(tickers) > 1: # 空データでない、かつ、ヘッダのみでない 
+        if debug:
+            tickers = tickers.head(100)
+            
+        # 3. 最新データを一括取得（本日のデータ）
+        try:
+            tickers_ohlc = yfinance.download(tickers.tolist(), period="1d", interval='1d', group_by="ticker", progress=False, auto_adjust=False, threads=True)
+        except Exception:
+            pass
     
 def create_tickers(date=datetime.datetime.today().date(), debug=False):
     """ 本日の注目銘柄のマスターファイルを作成する

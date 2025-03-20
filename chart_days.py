@@ -28,7 +28,7 @@ def create_daily_chart_csv2(ticker, folder=".", debug=False):
     
     try:
         daily_chart =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
-        last_date = daily_chart["Date"].max() # 最後のデータの日付
+        last_date = daily_chart.index.max() # 最後のデータの日付
         if debug:
             print(f"{ticker}: CSV内の最新データ日付: {last_date.date()}")
         
@@ -53,7 +53,8 @@ def create_daily_chart_csv2(ticker, folder=".", debug=False):
         # start_date = last_date + datetime.timedelta(days=1) # 最後の日の翌日から取得
         start_date = last_date - datetime.timedelta(weeks=1) # 最後の日の１週間前から取得
         start_date_str = start_date.strftime("%Y-%m-%d")
-        end_date_str = datetime.today().strftime("%Y-%m-%d")
+        end_date_str = datetime.datetime.today().strftime("%Y-%m-%d")
+    
         print(f"{ticker}: {start_date_str} から {end_date_str} までのデータを取得します...")
         try:
             update_chart = yfinance.download(tickers=f'{ticker}.T', start=start_date_str, end=end_date_str, progress=False, auto_adjust=False, threads=True)
@@ -384,6 +385,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    task(False)
+    task2(True)
  
             
