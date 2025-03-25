@@ -7,6 +7,7 @@ import numpy
 import indicator
 from zoneinfo import ZoneInfo
 import chart_days
+import time
 
 # コンフィグ
 # gdrivepath = '/content/drive/My Drive/stock/'
@@ -16,6 +17,7 @@ encode = 'utf-8'
 ohlc_folder = chart_days.daily_100_folder
 todayspickup_folder = 'todayspickup'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
+tickers_list_filename_full = f'{basepath}tickers_list.csv'
 
 def test(date=datetime.datetime.today().date(), debug=False):
     print(date)
@@ -36,26 +38,84 @@ def test(date=datetime.datetime.today().date(), debug=False):
 
 def create_tickers2(date=datetime.datetime.today().date(), debug=False):
     try:
-        # 1. 東証の全銘柄リストを取得（事前に用意した CSV ファイルを読み込む）
-        csv_path = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
-        tickers = pandas.read_csv(csv_path, dtype={'コード': str}, header=0, index_col=0)
-        
-        # 2. yfinance 用に 4桁の証券コードに「.T」を付ける
-        tickers = tickers['コード'].astype(str).str.zfill(4) + ".T"
-        
-    except Exception as e:
-        print(f"CSVを読み込めませんでした: {e}")
-        
-    if not tickers.empty and len(tickers) > 1: # 空データでない、かつ、ヘッダのみでない 
-        if debug:
-            tickers = tickers.head(100)
-            
-        # 3. 最新データを一括取得（本日のデータ）
-        try:
-            tickers_ohlc = yfinance.download(tickers.tolist(), period="1d", interval='1d', group_by="ticker", progress=False, auto_adjust=False, threads=True)
-        except Exception:
-            pass
+        # 東証の全銘柄リストを取得（事前に用意した CSV ファイルを読み込む）
+        csv_path = open(tickers_list_filename_full, 'r', encoding=encode)
+        tickers_list = pandas.read_csv(csv_path, header=0, index_col=0)
+        # tickers_list = pandas.read_csv(csv_path, dtype={'コード': str}, header=0)
     
+        if tickers_list.empty or len(tickers_list) <= 1:
+            return
+
+    except Exception as e:
+        print(f"{tickers_list_filename_full} CSVを読み込めませんでした: {e}")
+        return
+    
+    print(f"{tickers_list_filename_full}を読み込みました")
+            
+    # yfinance 用に 4桁の証券コードに「.T」を付ける
+    tickers_list["code"] = tickers_list.index.astype(str).str.zfill(4) + ".T"
+
+    if debug:
+        # tickers_list = tickers_list.head(200)
+        pass
+
+    # リストを分割
+    batch_size = 200
+    stock_batches = [tickers_list["code"].tolist()[i:i + batch_size] for i in range(0, len(tickers_list), batch_size)]
+
+    # 分割したリストを順番にダウンロード
+    tickers_ohlc = []
+    for idx, stock_batch in enumerate(stock_batches):
+        print(f"Downloading batch {idx+1}/{len(stock_batches)}...")
+        
+        try:
+            # tickers_ohlc = yfinance.download(tickers_list["code"].tolist(), period="1d", interval='1d', group_by="ticker", progress=True, auto_adjust=False, threads=True)
+            ohlc = yfinance.download(stock_batch, period="1d", interval='1d', group_by="ticker", progress=True, auto_adjust=False, threads=True)
+            tickers_ohlc.append(ohlc)
+            # 通信負荷を考慮し、一定時間スリープ
+            time.sleep(1)  # 規定秒待機    
+            
+        except Exception as e:
+            print(f"株価を読み込めませんでした: {e}")
+            continue
+        
+    if tickers_ohlc:
+        tickers_ohlc = pandas.concat(tickers_ohlc, axis=1)  # 列方向で結合
+        tickers_ohlc.to_csv("tickers_ohlc.csv")
+
+    tickers_ohlc.to_csv("tickers_ohlc.csv")
+    for ticker, row in tickers_list.iterrows():
+        ticker.zfill(4)
+        ticker_filename_full = f'{ohlc_folder}/{ticker}.csv'  
+        print(ticker)
+        
+        # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
+        if not os.path.exists(ticker_filename_full):
+            print(f"{ticker_filename_full}は読み込みなかったのでスキップします")    
+            continue
+        
+        ticker_csv_path = open(ticker_filename_full, 'r', encoding=encode)
+        ohlc_old = pandas.read_csv(ticker_csv_path, index_col = 0, parse_dates=True)
+        
+        try:
+            ohlc_today = tickers_ohlc[row["code"]]
+        except:
+            print("インデックスがないためスキップ")
+            continue
+        
+        last_date = ohlc_old.index[-1]
+        if last_date == ohlc_today.index[-1]:        
+            continue
+        
+        ohlc_updated = pandas.concat([ohlc_old, ohlc_today])
+        print(ohlc_updated)
+        
+
+
+
+    return
+
+
 def create_tickers(date=datetime.datetime.today().date(), debug=False):
     """ 本日の注目銘柄のマスターファイルを作成する
     """ 
@@ -251,8 +311,8 @@ if __name__ == "__main__":
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    create_tickers(date2,False)
-    change_view()
+    create_tickers2(date2,True)
+    # change_view()
     
     # ticker = 4824
     # start = time.time()
