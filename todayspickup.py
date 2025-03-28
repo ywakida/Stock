@@ -51,6 +51,8 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
         return
     
     print(f"{tickers_list_filename_full}を読み込みました")
+    
+    start = time.time() # ここで開始
             
     # yfinance 用に 4桁の証券コードに「.T」を付ける
     tickers_list["code"] = tickers_list.index.astype(str).str.zfill(4) + ".T"
@@ -81,9 +83,7 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
         
     if tickers_ohlc:
         tickers_ohlc = pandas.concat(tickers_ohlc, axis=1)  # 列方向で結合
-        tickers_ohlc.to_csv("tickers_ohlc.csv")
-
-    tickers_ohlc.to_csv("tickers_ohlc.csv")
+        
     for ticker, row in tickers_list.iterrows():
         ticker.zfill(4)
         ticker_filename_full = f'{ohlc_folder}/{ticker}.csv'  
@@ -108,11 +108,37 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
             continue
         
         ohlc_updated = pandas.concat([ohlc_old, ohlc_today])
-        print(ohlc_updated)
+        ohlc_updated.sort_index(inplace=True)
+        ohlc_updated = ohlc_updated[~ohlc_updated.index.duplicated(keep='last')]
+
+        # print(ohlc_updated)
+
         
+    print('一括ダウンロード方式:', time.time() - start)
+    start = time.time() # ここで開始
 
+    for ticker, row in tickers_list.iterrows():
+        print(ticker)
+        chart = pandas.DataFrame()
+        try:
 
+            chart = yfinance.download(tickers=f'{ticker}.T', period='1mo', interval='1d', progress=False)
+            chart.columns = chart.columns.get_level_values(0)
 
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON for ticker {ticker}: {e}")
+            
+        except Exception as e:
+            print(f"Failed to retrieve data for ticker {ticker}: {e}")
+        
+        if chart.empty:
+            print('ticker: ', ticker, ' data is empty.')
+            continue 
+        
+        chart.sort_index(inplace=True)
+        chart = chart[~chart.index.duplicated(keep='last')]
+
+    print('個別ダウンロード方式:', time.time() - start)
     return
 
 
