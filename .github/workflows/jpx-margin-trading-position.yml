@@ -21,11 +21,12 @@ jobs:
           echo "date=$today" >> $GITHUB_OUTPUT
 
       - name: Create folder
-        run: mkdir -p data
+        run: mkdir -p position
 
       - name: Attempt to download Excel file
         run: |
-          URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001vg2-att/margin_stock_${{ steps.date.outputs.date }}.xlsx"
+          URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001r92-att/mtdailyk${{ steps.date.outputs.date }}00.xlsx"
+          
           OUTPUT="data/margin_stock_${{ steps.date.outputs.date }}.xlsx"
 
           echo "Trying to download: $URL"
