@@ -1,0 +1,45 @@
+name: Fetch JPX Excel
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # 毎日17:00 JSTに相当
+  workflow_dispatch:
+
+jobs:
+  download-excel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set date variables (today JST)
+        id: date
+        run: |
+          TZ=Asia/Tokyo
+          today=$(date +'%Y%m%d')
+          echo "date=$today" >> $GITHUB_OUTPUT
+
+      - name: Create folder
+        run: mkdir -p data
+
+      - name: Attempt to download Excel file
+        run: |
+          URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001vg2-att/margin_stock_${{ steps.date.outputs.date }}.xlsx"
+          OUTPUT="data/margin_stock_${{ steps.date.outputs.date }}.xlsx"
+
+          echo "Trying to download: $URL"
+
+          curl -sf -L "$URL" -o "$OUTPUT" || echo "File not available yet."
+
+      - name: Commit downloaded file if exists
+        run: |
+          FILE="data/margin_stock_${{ steps.date.outputs.date }}.xlsx"
+          if [ -f "$FILE" ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git add "$FILE"
+            git commit -m "Add JPX margin stock data ${{ steps.date.outputs.date }}" || echo "No changes to commit"
+            git push
+          else
+            echo "No file to commit."
