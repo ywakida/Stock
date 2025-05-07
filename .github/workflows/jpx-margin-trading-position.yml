@@ -35,7 +35,7 @@ jobs:
 
       - name: Commit downloaded file if exists
         run: |
-          FILE="data/margin_stock_${{ steps.date.outputs.date }}.xlsx"
+          FILE="position/margin_stock_${{ steps.date.outputs.date }}.xlsx"
           if [ -f "$FILE" ]; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
