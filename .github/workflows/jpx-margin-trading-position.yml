@@ -26,7 +26,7 @@ jobs:
       - name: Attempt to download Excel file
         run: |
           URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001r92-att/mtdailyk${{ steps.date.outputs.date }}00.xlsx"
-               https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001r92-att/mtdailyk2025050200.xls
+  
           OUTPUT="position/margin_stock_${{ steps.date.outputs.date }}.xlsx"
 
           echo "Trying to download: $URL"
