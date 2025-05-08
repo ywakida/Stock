@@ -25,8 +25,8 @@ jobs:
 
       - name: Attempt to download Excel file
         run: |
-          URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001r92-att/mtdailyk${{ steps.date.outputs.date }}00.xlsx"
-          OUTPUT="position/margin_stock_${{ steps.date.outputs.date }}00.xlsx"
+          URL="https://www.jpx.co.jp/markets/statistics-equities/margin/tvdivq0000001r92-att/mtdailyk${{ steps.date.outputs.date }}00.xls"
+          OUTPUT="position/margin_stock_${{ steps.date.outputs.date }}.xls"
 
           echo "Trying to download: $URL"
 
@@ -34,7 +34,7 @@ jobs:
 
       - name: Commit downloaded file if exists
         run: |
-          FILE="position/margin_stock_${{ steps.date.outputs.date }}00.xlsx"
+          FILE="position/margin_stock_${{ steps.date.outputs.date }}.xls"
           if [ -f "$FILE" ]; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
