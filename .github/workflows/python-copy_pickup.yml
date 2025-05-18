@@ -36,3 +36,12 @@ jobs:
         if: env.has_files == 'true'
         run: |
           cp -r ./pickup_today/* ./pickup_1day_ago/
+          
+      - name: Commit and Push Changes
+        if: env.has_files == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./pickup_1day_ago/*
+          git commit -m "Update pickup_1day_ago folder at $(date +"%Y-%m-%d %H:%M:%S")"
+          git push
