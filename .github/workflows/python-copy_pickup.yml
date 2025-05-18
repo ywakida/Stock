@@ -35,7 +35,7 @@ jobs:
       - name: Copy files to pickup_1day_ago
         if: env.has_files == 'true'
         run: |
-          cp -r ./pickup_today/* ./pickup_1day_ago/
+          mv ./pickup_today/* ./pickup_1day_ago/
           
       - name: Commit and Push Changes
         if: env.has_files == 'true'
