@@ -15,7 +15,7 @@ basepath = './'
 encode = 'utf-8'
 
 ohlc_folder = chart_days.daily_100_folder
-todayspickup_folder = 'todayspickup'
+todayspickup_folder = 'pickup_today'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 tickers_list_filename_full = f'{basepath}tickers_list.csv'
 
@@ -62,7 +62,7 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
         pass
 
     # リストを分割
-    batch_size = 200
+    batch_size = 50
     stock_batches = [tickers_list["code"].tolist()[i:i + batch_size] for i in range(0, len(tickers_list), batch_size)]
 
     # 分割したリストを順番にダウンロード
@@ -87,7 +87,7 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
     for ticker, row in tickers_list.iterrows():
         ticker.zfill(4)
         ticker_filename_full = f'{ohlc_folder}/{ticker}.csv'  
-        print(ticker)
+        # print(ticker)
         
         # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
         if not os.path.exists(ticker_filename_full):
@@ -118,7 +118,7 @@ def create_tickers2(date=datetime.datetime.today().date(), debug=False):
     start = time.time() # ここで開始
 
     for ticker, row in tickers_list.iterrows():
-        print(ticker)
+        # print(ticker)
         chart = pandas.DataFrame()
         try:
 
@@ -337,7 +337,7 @@ if __name__ == "__main__":
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    create_tickers2(date2,True)
+    create_tickers2(date2,False)
     # change_view()
     
     # ticker = 4824
