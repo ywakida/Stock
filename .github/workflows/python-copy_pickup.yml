@@ -1,6 +1,7 @@
 name: Backup pickup files
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1-5"  # 月曜～金曜の9時 (UTCの0時)
 
