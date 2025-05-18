@@ -1,0 +1,37 @@
+name: Backup pickup files
+
+on:
+  schedule:
+    - cron: "0 0 * * 1-5"  # 月曜～金曜の9時 (UTCの0時)
+
+jobs:
+  copy-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check if there are files in pickup_today
+        id: check_files
+        run: |
+          if [ -z "$(ls -A ./pickup_today)" ]; then
+            echo "has_files=false" >> $GITHUB_ENV
+          else
+            echo "has_files=true" >> $GITHUB_ENV
+          fi
+
+      - name: Create pickup_1day_ago directory if not exists
+        if: env.has_files == 'true'
+        run: |
+          mkdir -p ./pickup_1day_ago
+
+      - name: Remove existing files in pickup_1day_ago
+        if: env.has_files == 'true'
+        run: |
+          rm -rf ./pickup_1day_ago/*
+
+      - name: Copy files to pickup_1day_ago
+        if: env.has_files == 'true'
+        run: |
+          cp -r ./pickup_today/* ./pickup_1day_ago/
