@@ -316,7 +316,7 @@ def change_view(debug=False):
         
         tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
         filename = f'./{todayspickup_folder}/over75day.csv'
-        tickers_list[tickers_list['75SMA越']>0,['銘柄名','75SMA越']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['75SMA越']>0,['銘柄名','75SMA越']].to_csv(filename, header=True) # 保存
         
         filename = f'./{todayspickup_folder}/over75high.csv'
         tickers_list.loc[tickers_list['75SMAと直近高値越']==True,['銘柄名','75SMAと直近高値越']].to_csv(filename, header=True) # 保存
