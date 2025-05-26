@@ -280,53 +280,54 @@ def change_view(debug=False):
         # print(ticker_chart.sort_values(by='出来高発行株式割合', ascending=False).head(100))
         # print('\n')
         # print(ticker_chart.sort_values(by='出来高前日比', ascending=False).head(100))
+        print('各特徴量に従って保存します。')
         
         tickers_list = tickers_list.sort_values(by='出来高発行株式割合', ascending=False)
         filename = f'./{todayspickup_folder}/volume_shares.csv'
-        tickers_list[tickers_list['出来高発行株式割合']> 10,['銘柄名','出来高発行株式割合','出来高前日比']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['出来高発行株式割合']> 10,['銘柄名','出来高発行株式割合','出来高前日比']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='出来高前日比', ascending=False)
         filename = f'./{todayspickup_folder}/volume_previous.csv'
-        tickers_list[tickers_list['出来高前日比']>2,['銘柄名','出来高前日比','出来高発行株式割合']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['出来高前日比']>2,['銘柄名','出来高前日比','出来高発行株式割合']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/akasanpei.csv'
-        tickers_list[tickers_list['三平']>2,['銘柄名','三平']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['三平']>2,['銘柄名','三平']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/akasanpei_rci.csv'
-        tickers_list[(tickers_list['三平']>2 and (tickers_list['RCI']<0)),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']>2) & (tickers_list['RCI']<0.0),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='三平', ascending=True)
         filename = f'./{todayspickup_folder}/kurosanpei.csv'
-        tickers_list[tickers_list['三平']<2,['銘柄名','三平']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['三平']<2,['銘柄名','三平']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/kurosanpei_rci.csv'
-        tickers_list[(tickers_list['三平']<2 and (tickers_list['RCI']>0)),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']<2) & (tickers_list['RCI']>0.0),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
                 
         tickers_list = tickers_list.sort_values(by='空', ascending=False)
         filename = f'./{todayspickup_folder}/aka_ku.csv'
-        tickers_list[tickers_list['空']>0,['銘柄名','空']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['空']>0,['銘柄名','空']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='空', ascending=True)
         filename = f'./{todayspickup_folder}/kuro_ku.csv'
-        tickers_list[tickers_list['空']<0,['銘柄名','空']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['空']<0,['銘柄名','空']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
         filename = f'./{todayspickup_folder}/over75day.csv'
         tickers_list[tickers_list['75SMA越']>0,['銘柄名','75SMA越']].to_csv(filename, header=True) # 保存
         
         filename = f'./{todayspickup_folder}/over75high.csv'
-        tickers_list[tickers_list['75SMAと直近高値越']==True,['銘柄名','75SMAと直近高値越']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['75SMAと直近高値越']==True,['銘柄名','75SMAと直近高値越']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
         filename = f'./{todayspickup_folder}/hanpatsu75.csv'
-        tickers_list[tickers_list['75反発']==True,['銘柄名','75反発']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['75反発']==True,['銘柄名','75反発']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='パーフェクトオーダー', ascending=True)
         filename = f'./{todayspickup_folder}/perfect2575200.csv'
-        tickers_list[tickers_list['パーフェクトオーダー']==True,['銘柄名','パーフェクトオーダー']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','パーフェクトオーダー']].to_csv(filename, header=True) # 保存
         
 if __name__ == "__main__":
     
@@ -343,12 +344,12 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2024, 12, 20).date()
+    date2 = datetime.datetime(2025, 5, 26).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    create_tickers2(date2,False)
-    # change_view()
+    # create_tickers(date2,True)
+    change_view()
     
     # ticker = 4824
     # start = time.time()
