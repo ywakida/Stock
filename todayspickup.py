@@ -186,6 +186,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         indicator.add_sma_pattern(chart)
         indicator.add_rci(chart, 9)
         indicator.add_sma_slope(chart)
+        indicator.add_breakout(chart)
 
         chart['出来高前日差'] = chart['Volume'].diff()
         chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
@@ -237,6 +238,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
             hanpatsu75 = chart.at[timestamp, 'Hanpatsu75']
             perfect2575200 = chart.at[timestamp, 'Perfect2575200']
             rci9 = chart.at[timestamp, 'Rci']
+            breakout = chart.at[timestamp, 'Breakout']
             
             try:
                 test_chart = pandas.DataFrame({'銘柄名':[name], 
@@ -257,6 +259,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                                             '75反発':hanpatsu75,
                                             'パーフェクトオーダー':perfect2575200,
                                             'RCI':rci9,
+                                            'ブレークアウト日数':breakout,
                                             },
                                             index=[ticker])
             except Exception:
@@ -286,11 +289,11 @@ def change_view(debug=False):
         
         tickers_list = tickers_list.sort_values(by='出来高発行株式割合', ascending=False)
         filename = f'./{todayspickup_folder}/volume_shares.csv'
-        tickers_list.loc[tickers_list['出来高発行株式割合']> 10,['銘柄名','出来高発行株式割合','出来高前日比']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['出来高発行株式割合']> 10,['銘柄名','出来高発行株式割合','出来高前日比','75SMA越']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='出来高前日比', ascending=False)
         filename = f'./{todayspickup_folder}/volume_previous.csv'
-        tickers_list.loc[tickers_list['出来高前日比']>2,['銘柄名','出来高前日比','出来高発行株式割合']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['出来高前日比']>2,['銘柄名','出来高前日比','出来高発行株式割合','75SMA越']].to_csv(filename, header=True) # 保存
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/akasanpei.csv'
@@ -298,7 +301,7 @@ def change_view(debug=False):
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/akasanpei_rci.csv'
-        tickers_list.loc[(tickers_list['三平']>2) & (tickers_list['RCI']<0.0),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']>2) & (tickers_list['RCI']<0.0),['銘柄名','三平','RCI','75SMA越']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='三平', ascending=True)
         filename = f'./{todayspickup_folder}/kurosanpei.csv'
@@ -306,7 +309,7 @@ def change_view(debug=False):
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/kurosanpei_rci.csv'
-        tickers_list.loc[(tickers_list['三平']<2) & (tickers_list['RCI']>0.0),['銘柄名','三平','RCI']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']<2) & (tickers_list['RCI']>0.0),['銘柄名','三平','RCI','75SMA越'],].to_csv(filename, header=True) # 保存
                 
         tickers_list = tickers_list.sort_values(by='空', ascending=False)
         filename = f'./{todayspickup_folder}/aka_ku.csv'
@@ -329,8 +332,12 @@ def change_view(debug=False):
         
         tickers_list = tickers_list.sort_values(by='パーフェクトオーダー', ascending=True)
         filename = f'./{todayspickup_folder}/perfect2575200.csv'
-        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','パーフェクトオーダー']].to_csv(filename, header=True) # 保存
-        
+        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','パーフェクトオーダー','75SMA越']].to_csv(filename, header=True) # 保存
+
+        tickers_list = tickers_list.sort_values(by='ブレークアウト日数', ascending=False)
+        filename = f'./{todayspickup_folder}/breakout.csv'
+        tickers_list.loc[tickers_list['ブレークアウト日数']>0,['銘柄名','ブレークアウト日数','75SMA越']].to_csv(filename, header=True) # 保存
+            
 if __name__ == "__main__":
     
     os.system('cls')
@@ -350,7 +357,7 @@ if __name__ == "__main__":
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    create_tickers(date2,True)
+    # create_tickers(date2,True)
     change_view()
     
     # ticker = 4824

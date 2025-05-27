@@ -346,6 +346,17 @@ def add_candlestick_pattern(chart):
     
     return chart
 
+def add_breakout(chart, max=120):
+    """ 過去何日分を超えたかを知る
+    """
+    sample=5
+    chart['Breakout'] = 0
+    for N in range(sample, max, sample):  # sampleからmaxまでsample刻み（含む）
+        rolling_max = chart['High'].rolling(window=N, min_periods=1).max().shift(1)
+        chart['Breakout'] = chart['Breakout'].mask(chart['Close'] > rolling_max, N)
+        
+    return chart
+
 import chart_plot
 if __name__ == "__main__":
     
@@ -374,13 +385,13 @@ if __name__ == "__main__":
     # tickers_list = tickers_list[tickers_list.index == 3778] # さくらインターネット
     # tickers_list = tickers_list[tickers_list.index == 9522] # リニューアルブル 
     # tickers_list = tickers_list[tickers_list.index == 6194] # アトラエ
-    tickers_list = tickers_list[tickers_list.index == '4435'] # カオナビ
+    # tickers_list = tickers_list[tickers_list.index == '4435'] # カオナビ
+    tickers_list = tickers_list[tickers_list.index == '1418'] # インターライフ
     
     print(tickers_list)
     
     folder = chart_days.daily_all_folder
     for ticker, row in tickers_list.iterrows():
-        
         
         chart_filename = f'{folder}/{ticker}.csv'
         if os.path.exists(chart_filename):
@@ -393,24 +404,20 @@ if __name__ == "__main__":
             # chart = chart[~chart.index.duplicated(keep='last')]        
             # chart.sort_index(inplace=True)
             # print(chart.tail(100))    
-            print(chart[chart['Close'] <2000])
+            # print(chart[chart['Close'] <2000])
             
-            add_basic(chart)
-
-            # print(chart[['Open', 'Close']].tail(5))
-            # print(chart[['Open', 'Close']].max(axis=1).tail(5))
-
-            
-            add_rci(chart)
-            add_swing_high_low(chart, width=2, only_entitiy=True, fill=True)
+            # add_basic(chart)            
+            # add_rci(chart)
+            # add_swing_high_low(chart, width=2, only_entitiy=True, fill=True)
             # add_heikinashi(chart)
-            add_candlestick_pattern(chart)
-            add_sma_pattern(chart)
+            # add_candlestick_pattern(chart)
+            # add_sma_pattern(chart)
+            add_breakout(chart)
             # print(chart[['High', 'SwingHigh']].tail(100))
             
             # chart = create_heikinashi(chart)
             # add_basic(chart)
-            chart['Buy'] = chart['crossdSMA75'] & (chart['SwingHigh'] < chart['Close'])
+            print(chart.tail(200))
             
             
             
