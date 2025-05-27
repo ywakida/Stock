@@ -193,12 +193,14 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
         chart['陽線陰線'] = '→'
         chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑')
         chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓')
-        # chart['75over'] = 0
-        # chart['75over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '1', inplace=True) # 突き抜け
-        # chart['75over'].mask((chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '2', inplace=True) # 上
-        # chart['25over'] = 0
-        # chart['25over'].mask((chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '1', inplace=True) # 突き抜け
-        # chart['25over'].mask((chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '2', inplace=True) # 上
+        
+        chart['75over'] = 0
+        chart.loc[(chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '75over'] = 1   # 条件1: 突き抜け        
+        chart.loc[(chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '75over'] = 2                                       # 条件2: 完全に上
+
+        chart['25over'] = 0
+        chart.loc[(chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '25over'] = 1   # 条件1: 突き抜け（Close > Open かつ Low <= SMA25 かつ High > SMA25）
+        chart.loc[(chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '25over'] = 2                                       # 条件2: 完全に上（Low > SMA25 かつ High > SMA25）
         
         y = chart[chart['SwingHigh'].notna()] # N/A以外を抽出する
         takane = 0
@@ -344,11 +346,11 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 5, 26).date()
+    date2 = datetime.datetime(2025, 5, 27).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    # create_tickers(date2,True)
+    create_tickers(date2,True)
     change_view()
     
     # ticker = 4824
