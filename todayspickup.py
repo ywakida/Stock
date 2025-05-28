@@ -353,11 +353,11 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 5, 27).date()
+    date2 = datetime.datetime(2025, 5, 28).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
-    # create_tickers(date2,True)
+    create_tickers(date2,True)
     change_view()
     
     # ticker = 4824

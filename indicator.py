@@ -234,11 +234,15 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
     for sma in param:
         if f'SMA{sma}' in chart.columns:
             # 連続してSMAを終値が超えている回数
-            chart[f'over{sma}'] = 0
-            chart[f'over{sma}'] = chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1)
-            y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
-            chart[f'over{sma}'] = chart[f'over{sma}'] * y
-            
+            # chart[f'over{sma}'] = 0
+            # chart[f'over{sma}'] = chart[f'over{sma}'].mask((chart['Close'] > chart[f'SMA{sma}']), 1)
+            # y = chart[f'over{sma}'].groupby((chart[f'over{sma}'] != chart[f'over{sma}'].shift()).cumsum()).cumcount() + 1 # 同じ数が連続している個数を算出
+            # chart[f'over{sma}'] = chart[f'over{sma}'] * y
+            # 条件を満たすフラグ列（True: Close > SMA）
+            flag = chart['Close'] > chart[f'SMA{sma}']
+            chart[f'over{sma}'] = flag.groupby((~flag).cumsum()).cumcount() + 1 # Trueの連続回数をカウント（Falseになったらリセット）
+            chart[f'over{sma}'] = chart[f'over{sma}'] * flag.astype(int)    # Falseのところは0に
+
             # 連続して下値を切り上げている回数
             chart[f'UnderUp'] = 0
             chart[f'UnderUp'] = chart[f'UnderUp'].mask(chart[['Close', 'Open']].min(axis='columns') > chart[['Close', 'Open']].min(axis='columns').shift(), 1)
