@@ -240,7 +240,7 @@ def add_sma_pattern(chart, param=[25, 75, 100]):
             # chart[f'over{sma}'] = chart[f'over{sma}'] * y
             # 条件を満たすフラグ列（True: Close > SMA）
             flag = chart['Close'] > chart[f'SMA{sma}']
-            chart[f'over{sma}'] = flag.groupby((~flag).cumsum()).cumcount() + 1 # Trueの連続回数をカウント（Falseになったらリセット）
+            chart[f'over{sma}'] = flag.groupby((~flag).cumsum()).cumcount() # Trueの連続回数をカウント（Falseになったらリセット）
             chart[f'over{sma}'] = chart[f'over{sma}'] * flag.astype(int)    # Falseのところは0に
 
             # 連続して下値を切り上げている回数
@@ -331,8 +331,6 @@ def add_candlestick_pattern(chart):
     # 2営業日の安値がほぼ同じ水準の場合。陰線・陽線の組み合わせは問いません。安値圏で現れればそこが底値として意識されるサインです。
     chart['Ashi2'] = chart['Ashi2'].mask((chart['Low']>=chart['Low'].shift()-kenuki_diff) & (chart['Low']<=chart['Low'].shift()+kenuki_diff), '毛抜き底(安値圏買い)')
 
-    
-    
     # > : 連続陽線で実体がひとつ前より上がっている数
     # < : 連続陰線で実体がひとつ前より下がっている数
     chart['Hei'] = 0
@@ -410,18 +408,18 @@ if __name__ == "__main__":
             # print(chart.tail(100))    
             # print(chart[chart['Close'] <2000])
             
-            # add_basic(chart)            
+            add_basic(chart)            
             # add_rci(chart)
             # add_swing_high_low(chart, width=2, only_entitiy=True, fill=True)
             # add_heikinashi(chart)
             # add_candlestick_pattern(chart)
-            # add_sma_pattern(chart)
-            add_breakout(chart)
+            add_sma_pattern(chart)
+            # add_breakout(chart)
             # print(chart[['High', 'SwingHigh']].tail(100))
             
             # chart = create_heikinashi(chart)
             # add_basic(chart)
-            print(chart.tail(200))
+            print(chart[['over25', 'over75']].tail(200))
             
             
             

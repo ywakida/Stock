@@ -321,7 +321,7 @@ def change_view(debug=False):
         
         tickers_list = tickers_list.sort_values(by='75SMA越', ascending=True)
         filename = f'./{todayspickup_folder}/over75day.csv'
-        tickers_list.loc[tickers_list['75SMA越']>0,['銘柄名','75SMA越']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[tickers_list['75SMA越']>0,['銘柄名','75SMA越','25SMA越','出来高前日比']].to_csv(filename, header=True) # 保存
         
         filename = f'./{todayspickup_folder}/over75high.csv'
         tickers_list.loc[tickers_list['75SMAと直近高値越']==True,['銘柄名','75SMAと直近高値越']].to_csv(filename, header=True) # 保存
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 5, 28).date()
+    date2 = datetime.datetime(2025, 5, 30).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
