@@ -73,12 +73,13 @@ jobs:
     - name: git update
       run: |
         # git update
+        git fetch origin main
         git add -A #.csv
         git status --porcelain
         if [ -n "$(git status --porcelain)" ]; then
             echo "there are changes";
             git commit -m "update & add ohlcv csv" -a       
-            git pull
+            git rebase origin/main || exit 1
             git push origin main
         else
             echo "no changes";
