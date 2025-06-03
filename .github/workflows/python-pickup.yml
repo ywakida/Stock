@@ -80,8 +80,8 @@ jobs:
             echo "there are changes";
             git commit -m "update & add ohlcv csv" -a       
             git rebase origin/main || exit 1
-            # git push origin main 
-            git pull origin main --strategy=ours # 本来は推奨しないが、csvファイルの更新は、
+            git push origin main 
+            #git pull origin main --strategy=ours # 本来は推奨しないが、csvファイルの更新は、
 
         else
             echo "no changes";
