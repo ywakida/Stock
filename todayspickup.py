@@ -147,7 +147,11 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
     """ 
     tickers_list = pandas.DataFrame()
     tickers_list = pandas.read_csv('tickers_list.csv', header=0, index_col=0)
-    # tickers_list = tickers_list.tail(150)
+    
+    # if debug:
+    #     # tickers_list = tickers_list[tickers_list.index == '1418'] # インターライフ
+    #     tickers_list = tickers_list.head(10)
+        
 
     ticker_chart = pandas.DataFrame() 
 
@@ -239,6 +243,9 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
             perfect2575200 = chart.at[timestamp, 'Perfect2575200']
             rci9 = chart.at[timestamp, 'Rci']
             breakout = chart.at[timestamp, 'Breakout']
+
+            # if debug:           
+            #     print(chart[['over25', 'over75']].tail(1))
             
             try:
                 test_chart = pandas.DataFrame({'銘柄名':[name], 
@@ -249,11 +256,11 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                                             '出来高前日比':[previousratio],
                                             '三平':[sanpei], 
                                             '空':[ku],
-                                            '25SMA越':[over25],
-                                            '75SMA越':[over75],
-                                            '足1':[ashi1],
-                                            '足2':[ashi2],
-                                            '直近高値越':[swinghigh],
+                                            '25SMA越':over25,
+                                            '75SMA越':over75,
+                                            '足1':ashi1,
+                                            '足2':ashi2,
+                                            '直近高値越':swinghigh,
                                             '75SMAと直近高値越':over75swinghigh,
                                             '直近高値':takane,
                                             '75反発':hanpatsu75,
@@ -262,6 +269,9 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
                                             'ブレークアウト日数':breakout,
                                             },
                                             index=[ticker])
+                
+                # print(test_chart)
+                
             except Exception:
                 pass
         
@@ -353,7 +363,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 5, 30).date()
+    date2 = datetime.datetime(2025, 6, 2).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
