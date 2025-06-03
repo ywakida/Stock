@@ -311,7 +311,7 @@ def change_view(debug=False):
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/akasanpei_rci.csv'
-        tickers_list.loc[(tickers_list['三平']>2) & (tickers_list['RCI']<0.0),['銘柄名','三平','RCI','75SMA越']].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']>2) & (tickers_list['RCI']<0.0),['銘柄名','三平','RCI','75SMA越','25SMA越']].to_csv(filename, header=True) # 保存
         
         tickers_list = tickers_list.sort_values(by='三平', ascending=True)
         filename = f'./{todayspickup_folder}/kurosanpei.csv'
@@ -319,7 +319,7 @@ def change_view(debug=False):
 
         tickers_list = tickers_list.sort_values(by='三平', ascending=False)
         filename = f'./{todayspickup_folder}/kurosanpei_rci.csv'
-        tickers_list.loc[(tickers_list['三平']<2) & (tickers_list['RCI']>0.0),['銘柄名','三平','RCI','75SMA越'],].to_csv(filename, header=True) # 保存
+        tickers_list.loc[(tickers_list['三平']<2) & (tickers_list['RCI']>0.0),['銘柄名','三平','RCI','75SMA越','25SMA越'],].to_csv(filename, header=True) # 保存
                 
         tickers_list = tickers_list.sort_values(by='空', ascending=False)
         filename = f'./{todayspickup_folder}/aka_ku.csv'
@@ -363,7 +363,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 6, 2).date()
+    date2 = datetime.datetime(2025, 6, 3).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
