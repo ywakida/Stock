@@ -14,7 +14,7 @@ import time
 basepath = './'
 encode = 'utf-8'
 
-ohlc_folder = chart_days.daily_100_folder
+ohlc_folder = chart_days.daily_500_folder
 todayspickup_folder = 'pickup_today'
 todayspickup_filename = f'./{todayspickup_folder}/master.csv'
 tickers_list_filename_full = f'{basepath}tickers_list.csv'
@@ -602,65 +602,6 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
 
             if today_row is not None:
                 ticker_chart = pd.concat([ticker_chart, today_row], sort=False)
-    
-            # indicator.add_basic(chart, [5, 25, 75, 100, 200])
-            # indicator.add_swing_high_low(chart, width=3, only_entitiy=True)
-            # indicator.add_candlestick_pattern(chart)
-            # indicator.add_sma_pattern(chart)
-            # indicator.add_rci(chart, 9)
-            # indicator.add_sma_slope(chart)
-            # indicator.add_breakout(chart)
-
-            # chart['出来高前日差'] = chart['Volume'].diff()
-            # chart['出来高前日比'] = (chart['Volume'] / chart['Volume'].shift(1)).round(1)
-            # chart['出来高発行株式割合'] = (chart['Volume'] / row['発行株式'] * 100).round(1)
-            # chart['陽線陰線'] = '→'
-            # chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] > chart['Open']), '↑')
-            # chart['陽線陰線'] = chart['陽線陰線'].mask((chart['Close'] < chart['Open']), '↓')
-            
-            # chart['75over'] = 0
-            # chart.loc[(chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA75']) & (chart['High'] > chart['SMA75']), '75over'] = 1
-            # chart.loc[(chart['Low'] > chart['SMA75']) & (chart['High'] > chart['SMA75']), '75over'] = 2
-
-            # chart['25over'] = 0
-            # chart.loc[(chart['Close'] > chart['Open']) & (chart['Low'] <= chart['SMA25']) & (chart['High'] > chart['SMA25']), '25over'] = 1
-            # chart.loc[(chart['Low'] > chart['SMA25']) & (chart['High'] > chart['SMA25']), '25over'] = 2
-
-            # y = chart[chart['SwingHigh'].notna()]
-            # takane = y.iloc[-1]['SwingHigh'] if not y.empty else 0
-            # chart['Swinghighover'] = chart['Close'] > takane
-            # chart['Over75swinghigh'] = chart['Swinghighover'] & chart['crossdSMA75']
-            # chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75'] > 0)
-            # chart['Perfect2575200'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200'])
-
-            # # 最新日のデータだけ保存
-            # if date == chart.index[-1].date():
-            #     timestamp = chart.index[-1]
-            #     try:
-            #         test_chart = pd.DataFrame({
-            #             '銘柄名': [row['銘柄名']],
-            #             '陽線陰線': [chart.at[timestamp, '陽線陰線']],
-            #             '出来高': [chart.at[timestamp, 'Volume']],
-            #             '出来高前日差': [chart.at[timestamp, '出来高前日差']],
-            #             '出来高発行株式割合': [chart.at[timestamp, '出来高発行株式割合']],
-            #             '出来高前日比': [chart.at[timestamp, '出来高前日比']],
-            #             '三平': [chart.at[timestamp, 'Hei']],
-            #             '空': [chart.at[timestamp, 'Ku']],
-            #             '25SMA越': [chart.at[timestamp, 'over25']],
-            #             '75SMA越': [chart.at[timestamp, 'over75']],
-            #             '足1': [chart.at[timestamp, 'Ashi1']],
-            #             '足2': [chart.at[timestamp, 'Ashi2']],
-            #             '直近高値越': [chart.at[timestamp, 'Swinghighover']],
-            #             '75SMAと直近高値越': [chart.at[timestamp, 'Over75swinghigh']],
-            #             '直近高値': [takane],
-            #             '75反発': [chart.at[timestamp, 'Hanpatsu75']],
-            #             'パーフェクトオーダー': [chart.at[timestamp, 'Perfect2575200']],
-            #             'RCI': [chart.at[timestamp, 'Rci']],
-            #             'ブレークアウト日数': [chart.at[timestamp, 'Breakout']],
-            #         }, index=[ticker])
-            #         ticker_chart = pd.concat([ticker_chart, test_chart])
-            #     except Exception as e:
-            #         print(f"Error extracting latest row for {ticker}: {e}")
 
     ticker_chart.index.name = 'Ticker'
     ticker_chart = ticker_chart.replace([np.inf, -np.inf], np.nan).fillna(0)
@@ -745,7 +686,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 6, 3).date()
+    date2 = datetime.datetime(2025, 6, 20).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)
