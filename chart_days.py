@@ -13,12 +13,14 @@ daily_all_folder = 'ohlc_daily_all'
 per1minute_folder = 'ohlc_1minute'
 per5minutes_folder = 'ohlc_5minutes'
 daily_100_folder = 'ohlc_daily_100days'
+daily_500_folder = 'ohlc_daily_500days'
  
 # フォルダの作成
 os.makedirs(daily_all_folder, exist_ok=True)
 os.makedirs(per1minute_folder, exist_ok=True)
 os.makedirs(per5minutes_folder, exist_ok=True)
 os.makedirs(daily_100_folder, exist_ok=True)
+os.makedirs(daily_500_folder, exist_ok=True)
 
 def create_daily_chart_csv2(ticker, folder=".", debug=False):
     """ 日足チャートのCSVの作成
@@ -83,6 +85,7 @@ def create_daily_chart_csv(ticker):
     """  
     daily_all_filename = f'{basepath}{daily_all_folder}/{ticker}.csv'
     daily_100_filename = f'{basepath}{daily_100_folder}/{ticker}.csv'
+    daily_500_filename = f'{basepath}{daily_500_folder}/{ticker}.csv'
     
     # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
     if not os.path.exists(daily_all_filename):
@@ -142,6 +145,7 @@ def create_daily_chart_csv(ticker):
                     daily_chart.sort_index(inplace=True)
                     daily_chart.to_csv(daily_all_filename, header=True) # 保存
                     daily_chart.tail(100).to_csv(daily_100_filename, header=True) # 保存
+                    daily_chart.tail(500).to_csv(daily_500_filename, header=True) # 保存
                     
                     print(f"{daily_all_filename} and {daily_100_filename} is updated")
                     # print(f"{daily_all_filename} is updated {delta_days} days")
@@ -328,7 +332,8 @@ def task(debug=False):
     
     if debug:
         # tickers_file = tickers_file[tickers_file.index >= '9000']
-        tickers_file = tickers_file.head(200)
+        # tickers_file = tickers_file.head(200)
+        tickers_file = tickers_file
     
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
@@ -375,7 +380,50 @@ def task2(debug=False):
             print("time: ", round(time_daily, 3))
 
     print('end:', datetime.datetime.now())
- 
+
+def create_partial_csv(debug=False):
+
+    # フォルダの指定
+    partial_days = 500
+    folder_all = 'ohlc_daily_all'
+    folder_partial = f'ohlc_daily_{partial_days}days'
+
+    # 銘柄一覧の読み出し
+    csvfile = open(f'{basepath}tickers_list.csv', 'r', encoding=encode)
+    tickers_file = pandas.read_csv(csvfile, header=0, index_col=0)
+    
+    time_daily = 0
+    
+    if debug:
+        # tickers_file = tickers_file[tickers_file.index >= '9000']
+        tickers_file = tickers_file.head(100)
+    
+    print('start:', datetime.datetime.now())
+    for ticker, row in tickers_file.iterrows():
+        if debug:
+            print(ticker)
+        
+        ite1 = time.time()
+        daily_all_filename = f'{basepath}{folder_all}/{ticker}.csv'
+        daily_partial_filename = f'{basepath}{folder_partial}/{ticker}.csv'
+
+        # ファイルが存在しなければ、全データをダウンロードし、ファイルを新規作成する     
+        if os.path.exists(daily_all_filename):
+
+            # csvファイルを読み取り、最新日付を取得する
+            daily_chart =  pandas.read_csv(daily_all_filename, index_col=0, parse_dates=True)
+            daily_chart.tail(partial_days).to_csv(daily_partial_filename, header=True) # 保存
+
+
+        ite2 = time.time()
+        time.sleep(1)
+        if debug:
+            time_daily += ite2 - ite1
+            print("time: ", round(time_daily, 3))
+
+    print('end:', datetime.datetime.now())
+
+
 if __name__ == "__main__":
     
     os.system('cls')
@@ -385,6 +433,6 @@ if __name__ == "__main__":
     pandas.set_option('display.max_columns', None)
     pandas.set_option('display.width', 1000)
     
-    task2(True)
- 
-            
+    # task2(True)
+
+    create_partial_csv(True)
