@@ -394,9 +394,10 @@ def create_partial_csv(debug=False):
     
     time_daily = 0
     
-    if debug:
+    #if debug:
+        
         # tickers_file = tickers_file[tickers_file.index >= '9000']
-        tickers_file = tickers_file.head(100)
+        #tickers_file = tickers_file.head(100)
     
     print('start:', datetime.datetime.now())
     for ticker, row in tickers_file.iterrows():
