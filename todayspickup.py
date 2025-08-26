@@ -194,6 +194,9 @@ def apply_indicators(chart, row):
     chart['Over75swinghigh'] = chart['Swinghighover'] & chart['crossdSMA75']
     chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75'] > 0)
     chart['Perfect2575200'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200'])
+    chart['Perfect2575200_rci'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200']) & (chart['Rci'] < 0.0)
+    chart['Perfect2575200_dr25'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200']) & (chart['DR25'] < 10)
+    chart['Perfect2575200_dr75'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200']) & (chart['DR75'] < 10)
 
     return chart, takane
 
@@ -206,6 +209,7 @@ def extract_today_row(chart, row, date, takane):
     timestamp = chart.index[-1]
     return pd.DataFrame({
         '銘柄名': [row['銘柄名']],
+        '終値': [chart.at[timestamp, 'Close']],
         '陽線陰線': [chart.at[timestamp, '陽線陰線']],
         '出来高': [chart.at[timestamp, 'Volume']],
         '出来高前日差': [chart.at[timestamp, '出来高前日差']],
@@ -222,7 +226,12 @@ def extract_today_row(chart, row, date, takane):
         '直近高値': [takane],
         '75反発': [chart.at[timestamp, 'Hanpatsu75']],
         'パーフェクトオーダー': [chart.at[timestamp, 'Perfect2575200']],
+        'パーフェクトオーダーRCI': [chart.at[timestamp, 'Perfect2575200_rci']],
+        'パーフェクトオーダー乖離率25': [chart.at[timestamp, 'Perfect2575200_dr25']],
+        'パーフェクトオーダー乖離率75': [chart.at[timestamp, 'Perfect2575200_dr75']],
         'RCI': [chart.at[timestamp, 'Rci']],
+        'DR25': [chart.at[timestamp, 'DR25']],
+        'DR75': [chart.at[timestamp, 'DR75']],
         'ブレークアウト日数': [chart.at[timestamp, 'Breakout']],
     }, index=[row.name])
 
@@ -337,7 +346,10 @@ def create_tickers4(date=datetime.datetime.today().date(), debug=False):
         chart['Hanpatsu75'] = (chart['over75'] > 1) & (chart['Rci'] < -80) & (chart['SMASlope75']> 0)
         
         chart['Perfect2575200'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200'])
-        
+        chart['Perfect2575200_rci'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200']) & (chart['Rci'] < 0)
+        chart['Perfect2575200_kairi'] = (chart['SMA25'] >= chart['SMA75']) & (chart['SMA75'] >= chart['SMA200']) & (chart['Rci'] > 0)
+
+
         # 変数への格納
         if date == chart.index[-1].date():
             timestamp = chart.index[-1]               
@@ -555,7 +567,7 @@ def create_tickers(date=datetime.datetime.today().date(), debug=False):
     tickers_list = pd.read_csv('tickers_list.csv', header=0, index_col=0)
 
     if debug:
-        tickers_list = tickers_list.head(1000000)
+        tickers_list = tickers_list.head(50)
 
     ticker_chart = pd.DataFrame()
     tickers = tickers_list.index.tolist()
@@ -667,6 +679,18 @@ def change_view(debug=False):
         filename = f'./{todayspickup_folder}/perfect2575200.csv'
         tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','パーフェクトオーダー','75SMA越']].to_csv(filename, header=True) # 保存
 
+        tickers_list = tickers_list.sort_values(by='RCI', ascending=True)
+        filename = f'./{todayspickup_folder}/perfect2575200_rci.csv'
+        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名', '終値','RCI','75SMA越']].to_csv(filename, header=True) # 保存
+
+        tickers_list = tickers_list.sort_values(by='DR25', ascending=True)
+        filename = f'./{todayspickup_folder}/perfect2575200_dr25.csv'
+        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','終値','DR25','75SMA越']].to_csv(filename, header=True) # 保存
+
+        tickers_list = tickers_list.sort_values(by='DR75', ascending=True)
+        filename = f'./{todayspickup_folder}/perfect2575200_dr75.csv'
+        tickers_list.loc[tickers_list['パーフェクトオーダー']==True,['銘柄名','終値','DR75','75SMA越']].to_csv(filename, header=True) # 保存
+
         tickers_list = tickers_list.sort_values(by='ブレークアウト日数', ascending=False)
         filename = f'./{todayspickup_folder}/breakout.csv'
         tickers_list.loc[tickers_list['ブレークアウト日数']>0,['銘柄名','ブレークアウト日数','75SMA越']].to_csv(filename, header=True) # 保存
@@ -686,7 +710,7 @@ if __name__ == "__main__":
     print('today().date():', datetime.datetime.today().date())
     print('today().timestamp():', datetime.datetime.today().timestamp())
     
-    date2 = datetime.datetime(2025, 6, 20).date()
+    date2 = datetime.datetime(2025, 8, 26).date()
     print(date2)
     # test(date2)
     # create_tickers(datetime.datetime.today().date(),True)

@@ -357,7 +357,33 @@ def add_breakout(chart, max=120):
         rolling_max = chart['High'].rolling(window=N, min_periods=1).max().shift(1)
         chart['Breakout'] = chart['Breakout'].mask(chart['Close'] > rolling_max, N)
         
+    
+    chart['Breakout'] = chart['Breakout'] - chart['Breakout'].shift(1)
+
     return chart
+
+# def add_breakout(chart, max=120):
+#     """ 過去何日分を超えたかを知る
+#         （前日が全く超えていない場合のみ）
+#     """
+#     sample = 5
+#     chart['Breakout'] = 0
+    
+#     for N in range(sample, max, sample):
+#         # 当日判断用の rolling_max
+#         rolling_max = chart['High'].rolling(window=N, min_periods=1).max().shift(1)
+#         # 前日判断用の rolling_max（前日までの最大値を参照）
+#         prev_rolling_max = rolling_max.shift(1)
+
+#         # 条件:
+#         #   当日 Close > 当日までの過去高値
+#         #   前日 Close <= 前日までの過去高値
+#         breakout_cond = (chart['Close'] > rolling_max) & (chart['Close'].shift(1) <= prev_rolling_max)
+
+#         chart['Breakout'] = chart['Breakout'].mask(breakout_cond, N)
+
+#     return chart
+
 
 import chart_plot
 if __name__ == "__main__":
