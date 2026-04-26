@@ -1,6 +1,10 @@
 # pip install beautifulsoup4 lxml html5lib
 
 import pandas
+from io import StringIO
+import requests
+import time
+
 
 class Kabutan():
     
@@ -26,7 +30,20 @@ class Kabutan():
         
     
     def __load(self):
-        data = pandas.read_html(self.url, index_col=0)
+        headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0 Safari/537.36"
+        )
+        }
+
+        response = requests.get(self.url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        data = pandas.read_html(StringIO(response.text), index_col=0)
+    
+        # data = pandas.read_html(self.url, index_col=0)
         
         if self.__debug == True:
             print("ticker:", self.__ticker, ",len = ", len(data))
